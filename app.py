@@ -1,14 +1,22 @@
-from flask import Flask, render_template, send_file, jsonify
+"""
+CitizenTech - Sistema de Otimização de Tráfego
+Flask API para servir dashboards e dados em tempo real
+"""
+
+from flask import Flask, jsonify
 import os
-from pathlib import Path
 import psycopg2
 from dotenv import load_dotenv
 from datetime import datetime
-import random
+import logging
 
 load_dotenv()
 
-app = Flask(__name__, template_folder='.', static_folder='.')
+app = Flask(__name__, static_folder=None, template_folder='.')
+
+# Configuração de logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Configuração do banco de dados
 DB_CONFIG = {
@@ -19,29 +27,29 @@ DB_CONFIG = {
     'database': os.getenv('DB_NAME', 'global_solution_db')
 }
 
-# Verificar arquivos HTML disponíveis
-HTML_FILES = {
-    'dashboard_completo': 'DASHBOARD_COMPLETO.html',
-    'dashboard': 'dashboard.html',
-    'mapa': 'mapa_rota_otimizada_final.html'
-}
-
-# Variáveis globais para controlar modo simulação
-db_connected = False
-
 def conectar_banco():
     """Tenta conectar ao banco de dados"""
-    global db_connected
     try:
-        conn = psycopg2.connect(**DB_CONFIG)
-        db_connected = True
+        conn = psycopg2.connect(
+            host=DB_CONFIG['host'],
+            port=DB_CONFIG['port'],
+            user=DB_CONFIG['user'],
+            password=DB_CONFIG['password'],
+            database=DB_CONFIG['database'],
+            connect_timeout=5
+        )
         return conn
     except Exception as e:
-        db_connected = False
+        logger.error(f"Erro ao conectar ao banco: {e}")
         return None
+
+# ============================================================================
+# ROTAS PRINCIPAL
+# ============================================================================
 
 @app.route('/')
 def index():
+    """Página inicial com cards dos dashboards"""
     return '''
     <!DOCTYPE html>
     <html lang="pt-BR">
@@ -181,108 +189,198 @@ def index():
                 </div>
             </div>
             <div class="footer">
-                <p>© 2025 CitizenTech - Desenvolvido para a Global Solution</p>
+                <p>© 2026 CitizenTech - Desenvolvido para a Global Solution</p>
             </div>
         </div>
     </body>
     </html>
     '''
 
+# ============================================================================
+# ROTAS DOS DASHBOARDS
+# ============================================================================
+
 @app.route('/dashboard/completo')
 def dashboard_completo():
-    with open('DASHBOARD_COMPLETO.html', 'r', encoding='utf-8') as f:
-        return f.read()
+    """Serve o Dashboard Completo com auto-refresh a cada 5 minutos"""
+    try:
+        with open('DASHBOARD_COMPLETO.html', 'r', encoding='utf-8') as f:
+            html = f.read()
+            # Injetar script de auto-refresh se não estiver presente
+            if 'setInterval' not in html:
+                html = html.replace('</body>', '''
+                <script>
+                // Auto-refresh a cada 5 minutos (300000ms)
+                setInterval(function() {
+                    fetch('/api/metricas')
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('Dados atualizados:', data);
+                            // Atualizar elementos do dashboard
+                            document.querySelectorAll('[data-metric]').forEach(el => {
+                                const metric = el.dataset.metric;
+                                if (data[metric] !== undefined) {
+                                    el.textContent = data[metric];
+                                }
+                            });
+                        })
+                        .catch(error => console.error('Erro ao buscar métricas:', error));
+                }, 300000); // 5 minutos
+                
+                // Primeira atualização imediata
+                fetch('/api/metricas')
+                    .then(response => response.json())
+                    .then(data => console.log('Status inicial:', data));
+                </script>
+                </body>''')
+            return html
+    except FileNotFoundError:
+        return "Dashboard não encontrado", 404
 
 @app.route('/dashboard/principal')
 def dashboard_principal():
-    with open('dashboard.html', 'r', encoding='utf-8') as f:
-        return f.read()
+    """Serve o Dashboard Principal com auto-refresh a cada 5 minutos"""
+    try:
+        with open('dashboard.html', 'r', encoding='utf-8') as f:
+            html = f.read()
+            # Injetar script de auto-refresh se não estiver presente
+            if 'setInterval' not in html:
+                html = html.replace('</body>', '''
+                <script>
+                // Auto-refresh a cada 5 minutos
+                setInterval(function() {
+                    fetch('/api/metricas')
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('Dashboard atualizado:', data);
+                            document.querySelectorAll('[data-metric]').forEach(el => {
+                                const metric = el.dataset.metric;
+                                if (data[metric] !== undefined) {
+                                    el.textContent = data[metric];
+                                }
+                            });
+                        })
+                        .catch(error => console.error('Erro:', error));
+                }, 300000); // 5 minutos
+                </script>
+                </body>''')
+            return html
+    except FileNotFoundError:
+        return "Dashboard não encontrado", 404
 
-@app.route('/api/metricas')
+@app.route('/dashboard/mapa')
+def dashboard_mapa():
+    """Serve o Mapa Interativo"""
+    try:
+        with open('mapa_rota_otimizada_final.html', 'r', encoding='utf-8') as f:
+            return f.read()
+    except FileNotFoundError:
+        return "Mapa não encontrado", 404
+
+# ============================================================================
+# ROTAS API
+# ============================================================================
+
+@app.route('/api/metricas', methods=['GET'])
 def api_metricas():
-    """API que retorna métricas atualizadas do banco de dados"""
+    """
+    Retorna métricas atualizadas do banco de dados
+    Atualizado a cada 5 minutos pela AWS/PostgreSQL
+    """
     conn = conectar_banco()
     
     if conn:
         try:
             cursor = conn.cursor()
-            # Consultar dados reais do banco
             cursor.execute("""
                 SELECT 
                     AVG(velocidade_atual) as velocidade_media,
-                    AVG(tempo_percurso_atual) as tempo_medio,
-                    COUNT(*) as total_registros,
-                    MAX(data_insercao) as ultima_atualizacao
-                FROM fato_transito
-                WHERE data_insercao >= NOW() - INTERVAL '30 minutes'
+                    AVG(tempo_viagem_segundos) as tempo_medio,
+                    COUNT(*) as total_registros
+                FROM fato_transito_tempo_real
             """)
             
             resultado = cursor.fetchone()
             cursor.close()
             conn.close()
             
-            if resultado:
+            if resultado and resultado[0] is not None:
                 return jsonify({
                     'status': 'conectado',
-                    'velocidade_media': round(resultado[0] or 0, 2),
-                    'tempo_medio': round(resultado[1] or 0, 2),
-                    'total_registros': resultado[2] or 0,
-                    'ultima_atualizacao': resultado[3].isoformat() if resultado[3] else None,
-                    'timestamp': datetime.now().isoformat()
+                    'velocidade_media': round(float(resultado[0]), 2),
+                    'tempo_medio': round(float(resultado[1]), 2) if resultado[1] else 0,
+                    'total_registros': int(resultado[2]),
+                    'timestamp': datetime.now().isoformat(),
+                    'banco': 'AWS PostgreSQL - Atualizado a cada 5 minutos'
                 })
         except Exception as e:
-            print(f"Erro ao consultar banco: {e}")
+            logger.error(f"Erro ao consultar banco: {e}")
+            conn.close()
     
-    # Modo simulação - retornar dados fake
+    # Fallback: modo simulação
+    import random
     return jsonify({
         'status': 'simulacao',
         'velocidade_media': round(random.uniform(25, 45), 2),
         'tempo_medio': round(random.uniform(8, 15), 2),
         'total_registros': random.randint(50, 150),
-        'ultima_atualizacao': datetime.now().isoformat(),
         'timestamp': datetime.now().isoformat(),
-        'aviso': 'Banco de dados não conectado. Dados em modo simulação.'
+        'aviso': 'Banco de dados em fallback. Dados simulados.'
     })
 
-@app.route('/api/status-banco')
+@app.route('/api/status-banco', methods=['GET'])
 def api_status_banco():
-    """Retorna status da conexão com o banco de dados"""
+    """Retorna o status da conexão com o banco de dados"""
     conn = conectar_banco()
     
     if conn:
-        conn.close()
-        return jsonify({
-            'banco_conectado': True,
-            'mensagem': 'Banco de dados AWS conectado com sucesso',
-            'dashboards_atualizando': True
-        })
-    else:
-        return jsonify({
-            'banco_conectado': False,
-            'mensagem': 'Banco de dados AWS não está acessível. Sistema em modo simulação.',
-            'dashboards_atualizando': False,
-            'dica': 'Verifique credenciais em .env e segurança do banco na AWS'
-        })
+        try:
+            cursor = conn.cursor()
+            cursor.execute("SELECT COUNT(*) FROM fato_transito_tempo_real")
+            count = cursor.fetchone()[0]
+            cursor.close()
+            conn.close()
+            
+            return jsonify({
+                'banco_conectado': True,
+                'mensagem': 'Banco de dados AWS conectado com sucesso',
+                'dashboards_atualizando': True,
+                'registros_total': count,
+                'atualizacao': 'Automática a cada 5 minutos'
+            })
+        except Exception as e:
+            logger.error(f"Erro ao consultar status: {e}")
+            conn.close()
+    
+    return jsonify({
+        'banco_conectado': False,
+        'mensagem': 'Banco de dados não acessível. Sistema em fallback.',
+        'dashboards_atualizando': False,
+        'atualizacao': 'Dados simulados'
+    }), 503
+
+# ============================================================================
+# INICIALIZAÇÃO
+# ============================================================================
 
 if __name__ == '__main__':
-    # Testar conexão ao iniciar
-    print("\n" + "="*60)
-    print("INICIANDO SERVIDOR FLASK - CitizenTech")
-    print("="*60)
+    print("\n" + "="*70)
+    print("CITIZENTECH - Sistema de Otimizacao de Trafego")
+    print("="*70)
     
+    # Testar conexão ao iniciar
     conn = conectar_banco()
     if conn:
-        print("[OK] Banco de dados AWS conectado!")
-        print("   Os dashboards ATUALIZARAO em tempo real")
+        print("[OK] Banco de dados AWS: CONECTADO")
+        print("   Dashboards atualizarao automaticamente a cada 5 minutos")
         conn.close()
     else:
-        print("[AVISO] Banco de dados não conectado")
-        print("   Os dashboards funcionarão em MODO SIMULACAO")
-        print("   Verifique as credenciais em .env")
+        print("[!] Banco de dados AWS: DESCONECTADO")
+        print("   Sistema operando em modo fallback (dados simulados)")
     
-    print("="*60)
-    print(f"Servidor rodando em http://0.0.0.0:5000")
-    print("="*60 + "\n")
+    print("="*70)
+    print("Servidor iniciando em http://0.0.0.0:5000")
+    print("="*70 + "\n")
     
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
