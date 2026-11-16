@@ -1,8 +1,23 @@
-from flask import Flask, render_template, send_file
+from flask import Flask, render_template, send_file, jsonify
 import os
 from pathlib import Path
+import psycopg2
+from dotenv import load_dotenv
+from datetime import datetime
+import random
+
+load_dotenv()
 
 app = Flask(__name__, template_folder='.', static_folder='.')
+
+# Configuração do banco de dados
+DB_CONFIG = {
+    'host': os.getenv('DB_HOST', 'localhost'),
+    'port': int(os.getenv('DB_PORT', 5432)),
+    'user': os.getenv('DB_USER', 'postgres'),
+    'password': os.getenv('DB_PASSWORD', ''),
+    'database': os.getenv('DB_NAME', 'global_solution_db')
+}
 
 # Verificar arquivos HTML disponíveis
 HTML_FILES = {
@@ -10,6 +25,20 @@ HTML_FILES = {
     'dashboard': 'dashboard.html',
     'mapa': 'mapa_rota_otimizada_final.html'
 }
+
+# Variáveis globais para controlar modo simulação
+db_connected = False
+
+def conectar_banco():
+    """Tenta conectar ao banco de dados"""
+    global db_connected
+    try:
+        conn = psycopg2.connect(**DB_CONFIG)
+        db_connected = True
+        return conn
+    except Exception as e:
+        db_connected = False
+        return None
 
 @app.route('/')
 def index():
@@ -169,11 +198,91 @@ def dashboard_principal():
     with open('dashboard.html', 'r', encoding='utf-8') as f:
         return f.read()
 
-@app.route('/dashboard/mapa')
-def mapa():
-    with open('mapa_rota_otimizada_final.html', 'r', encoding='utf-8') as f:
-        return f.read()
+@app.route('/api/metricas')
+def api_metricas():
+    """API que retorna métricas atualizadas do banco de dados"""
+    conn = conectar_banco()
+    
+    if conn:
+        try:
+            cursor = conn.cursor()
+            # Consultar dados reais do banco
+            cursor.execute("""
+                SELECT 
+                    AVG(velocidade_atual) as velocidade_media,
+                    AVG(tempo_percurso_atual) as tempo_medio,
+                    COUNT(*) as total_registros,
+                    MAX(data_insercao) as ultima_atualizacao
+                FROM fato_transito
+                WHERE data_insercao >= NOW() - INTERVAL '30 minutes'
+            """)
+            
+            resultado = cursor.fetchone()
+            cursor.close()
+            conn.close()
+            
+            if resultado:
+                return jsonify({
+                    'status': 'conectado',
+                    'velocidade_media': round(resultado[0] or 0, 2),
+                    'tempo_medio': round(resultado[1] or 0, 2),
+                    'total_registros': resultado[2] or 0,
+                    'ultima_atualizacao': resultado[3].isoformat() if resultado[3] else None,
+                    'timestamp': datetime.now().isoformat()
+                })
+        except Exception as e:
+            print(f"Erro ao consultar banco: {e}")
+    
+    # Modo simulação - retornar dados fake
+    return jsonify({
+        'status': 'simulacao',
+        'velocidade_media': round(random.uniform(25, 45), 2),
+        'tempo_medio': round(random.uniform(8, 15), 2),
+        'total_registros': random.randint(50, 150),
+        'ultima_atualizacao': datetime.now().isoformat(),
+        'timestamp': datetime.now().isoformat(),
+        'aviso': 'Banco de dados não conectado. Dados em modo simulação.'
+    })
+
+@app.route('/api/status-banco')
+def api_status_banco():
+    """Retorna status da conexão com o banco de dados"""
+    conn = conectar_banco()
+    
+    if conn:
+        conn.close()
+        return jsonify({
+            'banco_conectado': True,
+            'mensagem': 'Banco de dados AWS conectado com sucesso',
+            'dashboards_atualizando': True
+        })
+    else:
+        return jsonify({
+            'banco_conectado': False,
+            'mensagem': 'Banco de dados AWS não está acessível. Sistema em modo simulação.',
+            'dashboards_atualizando': False,
+            'dica': 'Verifique credenciais em .env e segurança do banco na AWS'
+        })
 
 if __name__ == '__main__':
+    # Testar conexão ao iniciar
+    print("\n" + "="*60)
+    print("INICIANDO SERVIDOR FLASK - CitizenTech")
+    print("="*60)
+    
+    conn = conectar_banco()
+    if conn:
+        print("[OK] Banco de dados AWS conectado!")
+        print("   Os dashboards ATUALIZARAO em tempo real")
+        conn.close()
+    else:
+        print("[AVISO] Banco de dados não conectado")
+        print("   Os dashboards funcionarão em MODO SIMULACAO")
+        print("   Verifique as credenciais em .env")
+    
+    print("="*60)
+    print(f"Servidor rodando em http://0.0.0.0:5000")
+    print("="*60 + "\n")
+    
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
