@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_df2b66010671adc8404b8a22532d5702 {
+                    position: relative;
+                    width: 100.0vw;
+                    height: 100.0vh;
+
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>/*
+ * Glyphicons Halflings -- the icon font used by folium's default Awesome Markers
+ * (Icon(prefix="glyphicon")). Extracted from Bootstrap 3's glyphicon rules only.
+ *
+ * folium previously loaded netdna's bootstrap-glyphicons.css, which despite its
+ * name ships a full Bootstrap-3 base stylesheet (normalize reset + global `body`
+ * rules) that leaked onto the host page (GH-1820). This file provides just the
+ * @font-face and .glyphicon/.glyphicon-* rules needed for the markers, with no
+ * page-wide side effects. Font files are served from jsDelivr.
+ */
+@font-face{font-family:'Glyphicons Halflings';src:url('https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/fonts/glyphicons-halflings-regular.eot');src:url('https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'),url('https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/fonts/glyphicons-halflings-regular.woff') format('woff'),url('https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/fonts/glyphicons-halflings-regular.ttf') format('truetype'),url('https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/fonts/glyphicons-halflings-regular.svg#glyphicons-halflingsregular') format('svg');}.glyphicon{position:relative;top:1px;display:inline-block;font-family:'Glyphicons Halflings';font-style:normal;font-weight:normal;line-height:1;-webkit-font-smoothing:antialiased;}
+.glyphicon-asterisk:before{content:"\2a";}
+.glyphicon-plus:before{content:"\2b";}
+.glyphicon-euro:before{content:"\20ac";}
+.glyphicon-minus:before{content:"\2212";}
+.glyphicon-cloud:before{content:"\2601";}
+.glyphicon-envelope:before{content:"\2709";}
+.glyphicon-pencil:before{content:"\270f";}
+.glyphicon-glass:before{content:"\e001";}
+.glyphicon-music:before{content:"\e002";}
+.glyphicon-search:before{content:"\e003";}
+.glyphicon-heart:before{content:"\e005";}
+.glyphicon-star:before{content:"\e006";}
+.glyphicon-star-empty:before{content:"\e007";}
+.glyphicon-user:before{content:"\e008";}
+.glyphicon-film:before{content:"\e009";}
+.glyphicon-th-large:before{content:"\e010";}
+.glyphicon-th:before{content:"\e011";}
+.glyphicon-th-list:before{content:"\e012";}
+.glyphicon-ok:before{content:"\e013";}
+.glyphicon-remove:before{content:"\e014";}
+.glyphicon-zoom-in:before{content:"\e015";}
+.glyphicon-zoom-out:before{content:"\e016";}
+.glyphicon-off:before{content:"\e017";}
+.glyphicon-signal:before{content:"\e018";}
+.glyphicon-cog:before{content:"\e019";}
+.glyphicon-trash:before{content:"\e020";}
+.glyphicon-home:before{content:"\e021";}
+.glyphicon-file:before{content:"\e022";}
+.glyphicon-time:before{content:"\e023";}
+.glyphicon-road:before{content:"\e024";}
+.glyphicon-download-alt:before{content:"\e025";}
+.glyphicon-download:before{content:"\e026";}
+.glyphicon-upload:before{content:"\e027";}
+.glyphicon-inbox:before{content:"\e028";}
+.glyphicon-play-circle:before{content:"\e029";}
+.glyphicon-repeat:before{content:"\e030";}
+.glyphicon-refresh:before{content:"\e031";}
+.glyphicon-list-alt:before{content:"\e032";}
+.glyphicon-flag:before{content:"\e034";}
+.glyphicon-headphones:before{content:"\e035";}
+.glyphicon-volume-off:before{content:"\e036";}
+.glyphicon-volume-down:before{content:"\e037";}
+.glyphicon-volume-up:before{content:"\e038";}
+.glyphicon-qrcode:before{content:"\e039";}
+.glyphicon-barcode:before{content:"\e040";}
+.glyphicon-tag:before{content:"\e041";}
+.glyphicon-tags:before{content:"\e042";}
+.glyphicon-book:before{content:"\e043";}
+.glyphicon-print:before{content:"\e045";}
+.glyphicon-font:before{content:"\e047";}
+.glyphicon-bold:before{content:"\e048";}
+.glyphicon-italic:before{content:"\e049";}
+.glyphicon-text-height:before{content:"\e050";}
+.glyphicon-text-width:before{content:"\e051";}
+.glyphicon-align-left:before{content:"\e052";}
+.glyphicon-align-center:before{content:"\e053";}
+.glyphicon-align-right:before{content:"\e054";}
+.glyphicon-align-justify:before{content:"\e055";}
+.glyphicon-list:before{content:"\e056";}
+.glyphicon-indent-left:before{content:"\e057";}
+.glyphicon-indent-right:before{content:"\e058";}
+.glyphicon-facetime-video:before{content:"\e059";}
+.glyphicon-picture:before{content:"\e060";}
+.glyphicon-map-marker:before{content:"\e062";}
+.glyphicon-adjust:before{content:"\e063";}
+.glyphicon-tint:before{content:"\e064";}
+.glyphicon-edit:before{content:"\e065";}
+.glyphicon-share:before{content:"\e066";}
+.glyphicon-check:before{content:"\e067";}
+.glyphicon-move:before{content:"\e068";}
+.glyphicon-step-backward:before{content:"\e069";}
+.glyphicon-fast-backward:before{content:"\e070";}
+.glyphicon-backward:before{content:"\e071";}
+.glyphicon-play:before{content:"\e072";}
+.glyphicon-pause:before{content:"\e073";}
+.glyphicon-stop:before{content:"\e074";}
+.glyphicon-forward:before{content:"\e075";}
+.glyphicon-fast-forward:before{content:"\e076";}
+.glyphicon-step-forward:before{content:"\e077";}
+.glyphicon-eject:before{content:"\e078";}
+.glyphicon-chevron-left:before{content:"\e079";}
+.glyphicon-chevron-right:before{content:"\e080";}
+.glyphicon-plus-sign:before{content:"\e081";}
+.glyphicon-minus-sign:before{content:"\e082";}
+.glyphicon-remove-sign:before{content:"\e083";}
+.glyphicon-ok-sign:before{content:"\e084";}
+.glyphicon-question-sign:before{content:"\e085";}
+.glyphicon-info-sign:before{content:"\e086";}
+.glyphicon-screenshot:before{content:"\e087";}
+.glyphicon-remove-circle:before{content:"\e088";}
+.glyphicon-ok-circle:before{content:"\e089";}
+.glyphicon-ban-circle:before{content:"\e090";}
+.glyphicon-arrow-left:before{content:"\e091";}
+.glyphicon-arrow-right:before{content:"\e092";}
+.glyphicon-arrow-up:before{content:"\e093";}
+.glyphicon-arrow-down:before{content:"\e094";}
+.glyphicon-share-alt:before{content:"\e095";}
+.glyphicon-resize-full:before{content:"\e096";}
+.glyphicon-resize-small:before{content:"\e097";}
+.glyphicon-exclamation-sign:before{content:"\e101";}
+.glyphicon-gift:before{content:"\e102";}
+.glyphicon-leaf:before{content:"\e103";}
+.glyphicon-eye-open:before{content:"\e105";}
+.glyphicon-eye-close:before{content:"\e106";}
+.glyphicon-warning-sign:before{content:"\e107";}
+.glyphicon-plane:before{content:"\e108";}
+.glyphicon-random:before{content:"\e110";}
+.glyphicon-comment:before{content:"\e111";}
+.glyphicon-magnet:before{content:"\e112";}
+.glyphicon-chevron-up:before{content:"\e113";}
+.glyphicon-chevron-down:before{content:"\e114";}
+.glyphicon-retweet:before{content:"\e115";}
+.glyphicon-shopping-cart:before{content:"\e116";}
+.glyphicon-folder-close:before{content:"\e117";}
+.glyphicon-folder-open:before{content:"\e118";}
+.glyphicon-resize-vertical:before{content:"\e119";}
+.glyphicon-resize-horizontal:before{content:"\e120";}
+.glyphicon-hdd:before{content:"\e121";}
+.glyphicon-bullhorn:before{content:"\e122";}
+.glyphicon-certificate:before{content:"\e124";}
+.glyphicon-thumbs-up:before{content:"\e125";}
+.glyphicon-thumbs-down:before{content:"\e126";}
+.glyphicon-hand-right:before{content:"\e127";}
+.glyphicon-hand-left:before{content:"\e128";}
+.glyphicon-hand-up:before{content:"\e129";}
+.glyphicon-hand-down:before{content:"\e130";}
+.glyphicon-circle-arrow-right:before{content:"\e131";}
+.glyphicon-circle-arrow-left:before{content:"\e132";}
+.glyphicon-circle-arrow-up:before{content:"\e133";}
+.glyphicon-circle-arrow-down:before{content:"\e134";}
+.glyphicon-globe:before{content:"\e135";}
+.glyphicon-tasks:before{content:"\e137";}
+.glyphicon-filter:before{content:"\e138";}
+.glyphicon-fullscreen:before{content:"\e140";}
+.glyphicon-dashboard:before{content:"\e141";}
+.glyphicon-heart-empty:before{content:"\e143";}
+.glyphicon-link:before{content:"\e144";}
+.glyphicon-phone:before{content:"\e145";}
+.glyphicon-usd:before{content:"\e148";}
+.glyphicon-gbp:before{content:"\e149";}
+.glyphicon-sort:before{content:"\e150";}
+.glyphicon-sort-by-alphabet:before{content:"\e151";}
+.glyphicon-sort-by-alphabet-alt:before{content:"\e152";}
+.glyphicon-sort-by-order:before{content:"\e153";}
+.glyphicon-sort-by-order-alt:before{content:"\e154";}
+.glyphicon-sort-by-attributes:before{content:"\e155";}
+.glyphicon-sort-by-attributes-alt:before{content:"\e156";}
+.glyphicon-unchecked:before{content:"\e157";}
+.glyphicon-expand:before{content:"\e158";}
+.glyphicon-collapse-down:before{content:"\e159";}
+.glyphicon-collapse-up:before{content:"\e160";}
+.glyphicon-log-in:before{content:"\e161";}
+.glyphicon-flash:before{content:"\e162";}
+.glyphicon-log-out:before{content:"\e163";}
+.glyphicon-new-window:before{content:"\e164";}
+.glyphicon-record:before{content:"\e165";}
+.glyphicon-save:before{content:"\e166";}
+.glyphicon-open:before{content:"\e167";}
+.glyphicon-saved:before{content:"\e168";}
+.glyphicon-import:before{content:"\e169";}
+.glyphicon-export:before{content:"\e170";}
+.glyphicon-send:before{content:"\e171";}
+.glyphicon-floppy-disk:before{content:"\e172";}
+.glyphicon-floppy-saved:before{content:"\e173";}
+.glyphicon-floppy-remove:before{content:"\e174";}
+.glyphicon-floppy-save:before{content:"\e175";}
+.glyphicon-floppy-open:before{content:"\e176";}
+.glyphicon-credit-card:before{content:"\e177";}
+.glyphicon-transfer:before{content:"\e178";}
+.glyphicon-cutlery:before{content:"\e179";}
+.glyphicon-header:before{content:"\e180";}
+.glyphicon-compressed:before{content:"\e181";}
+.glyphicon-earphone:before{content:"\e182";}
+.glyphicon-phone-alt:before{content:"\e183";}
+.glyphicon-tower:before{content:"\e184";}
+.glyphicon-stats:before{content:"\e185";}
+.glyphicon-sd-video:before{content:"\e186";}
+.glyphicon-hd-video:before{content:"\e187";}
+.glyphicon-subtitles:before{content:"\e188";}
+.glyphicon-sound-stereo:before{content:"\e189";}
+.glyphicon-sound-dolby:before{content:"\e190";}
+.glyphicon-sound-5-1:before{content:"\e191";}
+.glyphicon-sound-6-1:before{content:"\e192";}
+.glyphicon-sound-7-1:before{content:"\e193";}
+.glyphicon-copyright-mark:before{content:"\e194";}
+.glyphicon-registration-mark:before{content:"\e195";}
+.glyphicon-cloud-download:before{content:"\e197";}
+.glyphicon-cloud-upload:before{content:"\e198";}
+.glyphicon-tree-conifer:before{content:"\e199";}
+.glyphicon-tree-deciduous:before{content:"\e200";}
+.glyphicon-briefcase:before{content:"\1f4bc";}
+.glyphicon-calendar:before{content:"\1f4c5";}
+.glyphicon-pushpin:before{content:"\1f4cc";}
+.glyphicon-paperclip:before{content:"\1f4ce";}
+.glyphicon-camera:before{content:"\1f4f7";}
+.glyphicon-lock:before{content:"\1f512";}
+.glyphicon-bell:before{content:"\1f514";}
+.glyphicon-bookmark:before{content:"\1f516";}
+.glyphicon-fire:before{content:"\1f525";}
+.glyphicon-wrench:before{content:"\1f527";}
+</style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+    <script src="https://cdn.jsdelivr.net/npm/leaflet.fullscreen@3.0.0/Control.FullScreen.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.fullscreen@3.0.0/Control.FullScreen.css"/>
+</head>
+<body>
+    
+    
+    <div style="position: fixed; bottom: 30px; right: 30px; width: 310px;
+                background-color: white; border: 2px solid #333; z-index:9999; 
+                font-size: 12px; padding: 15px; border-radius: 8px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+        
+        <h3 style="margin: 0 0 12px 0; color: #333; font-size: 14px; font-weight: 600;">
+            Legenda - Rota Otimizada
+        </h3>
+        
+        <div style="margin: 10px 0; padding-bottom: 10px; border-bottom: 1px solid #eee;">
+            <div style="margin: 6px 0;">
+                <span style="color: #2ecc71; font-weight: bold; font-size: 16px;">●</span> 
+                <span style="margin-left: 8px;"><b>INICIO</b> - Centro (Praca da Liberdade)</span>
+            </div>
+            <div style="margin: 6px 0;">
+                <span style="color: #3498db; font-weight: bold; font-size: 16px;">●</span> 
+                <span style="margin-left: 8px;"><b>SEMAFORO</b> - Otimizado pelo Algoritmo</span>
+            </div>
+            <div style="margin: 6px 0;">
+                <span style="color: #f39c12; font-weight: bold; font-size: 16px;">●</span> 
+                <span style="margin-left: 8px;"><b>PASSAGEM</b> - Via Intermediaria</span>
+            </div>
+            <div style="margin: 6px 0;">
+                <span style="color: #e74c3c; font-weight: bold; font-size: 16px;">●</span> 
+                <span style="margin-left: 8px;"><b>DESTINO</b> - Funcionarios</span>
+            </div>
+            <div style="margin: 6px 0;">
+                <span style="color: #6366f1; font-weight: bold;">━━━</span> 
+                <span style="margin-left: 8px;"><b>Rota Real</b> - Seguindo as ruas</span>
+            </div>
+        </div>
+        
+        <div style="margin: 10px 0; padding: 10px; background: #e8f4f8; border-radius: 4px; font-size: 11px;">
+            <b style="color: #0066cc;">Legenda TomTom Traffic:</b>
+            <p style="margin: 4px 0;">🟢 Verde = Fluxo livre (velocidade normal)</p>
+            <p style="margin: 4px 0;">🟡 Amarelo = Lentidao moderada</p>
+            <p style="margin: 4px 0;">🔴 Vermelho = Congestionamento</p>
+        </div>
+        
+        <div style="margin: 10px 0; padding: 10px; background: #f0f8f0; border-radius: 4px; font-size: 11px; border-left: 3px solid #2ecc71;">
+            <b>Impacto da Otimizacao de Semaforos:</b>
+            <p style="margin: 4px 0;">✓ +180 segundos ganhos</p>
+            <p style="margin: 4px 0;">✓ 900m fila reduzida</p>
+            <p style="margin: 4px 0;">✓ 2.1 minutos economizados</p>
+        </div>
+    </div>
+    
+    
+    <div style="position: fixed; top: 20px; left: 20px; width: 330px;
+                background-color: white; border-radius: 8px; z-index:9999; 
+                padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+        <h2 style="margin: 0 0 5px 0; font-size: 20px; color: #333; font-weight: 600;">
+            🚦 Mapa com Trafego Real
+        </h2>
+        <p style="margin: 0 0 10px 0; font-size: 12px; color: #666;">
+            Belo Horizonte - Rota Inteligente em Tempo Real
+        </p>
+        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd;">
+            <p style="margin: 2px 0; font-size: 11px; color: #666;">
+                <b>Sistema:</b> Algoritmo de Otimizacao de Semaforos - CitizenTech
+            </p>
+            <p style="margin: 2px 0; font-size: 11px; color: #666;">
+                <b>Dados:</b> TomTom Traffic + OpenStreetMap
+            </p>
+            <p style="margin: 2px 0; font-size: 11px; color: #666;">
+                <b>Mapa:</b> Folium + OSM-DE Tiles
+            </p>
+            <span style="display: inline-block; background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); color: white; 
+                        padding: 6px 12px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-top: 10px; box-shadow: 0 2px 5px rgba(46,204,113,0.3);">
+                ✓ MAPA ATIVO E FUNCIONAL
+            </span>
+        </div>
+    </div>
+    
+    
+            <div class="folium-map" id="map_df2b66010671adc8404b8a22532d5702" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_df2b66010671adc8404b8a22532d5702 = L.map(
+                "map_df2b66010671adc8404b8a22532d5702",
+                {
+                    center: [-19.9167, -43.9345],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 13,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_c11739e82ae2c062b87298a759f08174 = L.tileLayer(
+                "https://tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 18,
+  "maxNativeZoom": 18,
+  "noWrap": false,
+  "attribution": "\u0026copy; OpenStreetMap DE",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_c11739e82ae2c062b87298a759f08174.addTo(map_df2b66010671adc8404b8a22532d5702);
+        
+    
+            var tile_layer_9fd416761cd0fa7638d7f1f4d622e63d = L.tileLayer(
+                "https://api.tomtom.com/traffic/map/4/tile/Relative/{z}/{x}/{y}.png?key=hXan3baE73yeieqt6nD012BISAW65QoJ",
+                {
+  "minZoom": 0,
+  "maxZoom": 18,
+  "maxNativeZoom": 18,
+  "noWrap": false,
+  "attribution": "TomTom Traffic",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 0.7,
+}
+
+            );
+        
+    
+            tile_layer_9fd416761cd0fa7638d7f1f4d622e63d.addTo(map_df2b66010671adc8404b8a22532d5702);
+        
+    
+            var circle_marker_ae0cbae110c063e261406d1eb6f6df93 = L.circleMarker(
+                [-19.9289, -43.9348],
+                {"bubblingMouseEvents": true, "color": "#2ecc71", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#2ecc71", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1, "radius": 14, "stroke": true, "weight": 3}
+            ).addTo(map_df2b66010671adc8404b8a22532d5702);
+        
+    
+        var popup_022bdc40aae293b58c340d25a3b63daf = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_7f2010f7f37995f889e8e35f2862498f = $(`<div id="html_7f2010f7f37995f889e8e35f2862498f" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial; width: 220px; padding: 10px;">             <h3 style="margin: 0 0 8px 0; color: #333; font-size: 14px;">                 Centro - Saida             </h3>             <p style="margin: 0 0 5px 0; color: #666; font-size: 12px;">                 <b>Localizacao:</b> Praca da Liberdade             </p>             <p style="margin: 0 0 5px 0; color: #666; font-size: 12px;">                 <b>Coordenadas:</b> -19.9289, -43.9348             </p>             <p style="margin: 0; color: #999; font-size: 11px;">                 <b>Tipo:</b> INICIO             </p>         </div>         </div>`)[0];
+                popup_022bdc40aae293b58c340d25a3b63daf.setContent(html_7f2010f7f37995f889e8e35f2862498f);
+            
+        
+
+        circle_marker_ae0cbae110c063e261406d1eb6f6df93.bindPopup(popup_022bdc40aae293b58c340d25a3b63daf)
+        ;
+
+        
+    
+    
+            circle_marker_ae0cbae110c063e261406d1eb6f6df93.bindTooltip(
+                `<div>
+                     Centro - Saida
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_c8c8266df89e3d9a11b970511c40d451 = L.circleMarker(
+                [-19.9265, -43.932],
+                {"bubblingMouseEvents": true, "color": "#3498db", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#3498db", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1, "radius": 14, "stroke": true, "weight": 3}
+            ).addTo(map_df2b66010671adc8404b8a22532d5702);
+        
+    
+        var popup_925021f89e292612092e8585183ea6f1 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_c379248658fd5e3043462fecd9b37998 = $(`<div id="html_c379248658fd5e3043462fecd9b37998" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial; width: 220px; padding: 10px;">             <h3 style="margin: 0 0 8px 0; color: #333; font-size: 14px;">                 Semaforo 1             </h3>             <p style="margin: 0 0 5px 0; color: #666; font-size: 12px;">                 <b>Localizacao:</b> Av. Afonso Pena             </p>             <p style="margin: 0 0 5px 0; color: #666; font-size: 12px;">                 <b>Coordenadas:</b> -19.9265, -43.9320             </p>             <p style="margin: 0; color: #999; font-size: 11px;">                 <b>Tipo:</b> OTIMIZADO             </p>         </div>         </div>`)[0];
+                popup_925021f89e292612092e8585183ea6f1.setContent(html_c379248658fd5e3043462fecd9b37998);
+            
+        
+
+        circle_marker_c8c8266df89e3d9a11b970511c40d451.bindPopup(popup_925021f89e292612092e8585183ea6f1)
+        ;
+
+        
+    
+    
+            circle_marker_c8c8266df89e3d9a11b970511c40d451.bindTooltip(
+                `<div>
+                     Semaforo 1
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_5f395d15dfa6dacbecc83d7816f71259 = L.circleMarker(
+                [-19.921, -43.928],
+                {"bubblingMouseEvents": true, "color": "#3498db", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#3498db", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1, "radius": 14, "stroke": true, "weight": 3}
+            ).addTo(map_df2b66010671adc8404b8a22532d5702);
+        
+    
+        var popup_cc7b19ea71426e4d5abbc3175c95f0cb = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_76b69e8855ab7f5e90e7647a7ee5b09a = $(`<div id="html_76b69e8855ab7f5e90e7647a7ee5b09a" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial; width: 220px; padding: 10px;">             <h3 style="margin: 0 0 8px 0; color: #333; font-size: 14px;">                 Semaforo 2             </h3>             <p style="margin: 0 0 5px 0; color: #666; font-size: 12px;">                 <b>Localizacao:</b> Av. Getulio Vargas             </p>             <p style="margin: 0 0 5px 0; color: #666; font-size: 12px;">                 <b>Coordenadas:</b> -19.9210, -43.9280             </p>             <p style="margin: 0; color: #999; font-size: 11px;">                 <b>Tipo:</b> OTIMIZADO             </p>         </div>         </div>`)[0];
+                popup_cc7b19ea71426e4d5abbc3175c95f0cb.setContent(html_76b69e8855ab7f5e90e7647a7ee5b09a);
+            
+        
+
+        circle_marker_5f395d15dfa6dacbecc83d7816f71259.bindPopup(popup_cc7b19ea71426e4d5abbc3175c95f0cb)
+        ;
+
+        
+    
+    
+            circle_marker_5f395d15dfa6dacbecc83d7816f71259.bindTooltip(
+                `<div>
+                     Semaforo 2
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_370043c95ace3df86973a54913ad7212 = L.circleMarker(
+                [-19.9175, -43.925],
+                {"bubblingMouseEvents": true, "color": "#3498db", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#3498db", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1, "radius": 14, "stroke": true, "weight": 3}
+            ).addTo(map_df2b66010671adc8404b8a22532d5702);
+        
+    
+        var popup_1cf6c2d2f0c43a1c19b11083e98a94f0 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_5147563fc809206e02981880fec2300f = $(`<div id="html_5147563fc809206e02981880fec2300f" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial; width: 220px; padding: 10px;">             <h3 style="margin: 0 0 8px 0; color: #333; font-size: 14px;">                 Semaforo 3             </h3>             <p style="margin: 0 0 5px 0; color: #666; font-size: 12px;">                 <b>Localizacao:</b> Rua Bahia             </p>             <p style="margin: 0 0 5px 0; color: #666; font-size: 12px;">                 <b>Coordenadas:</b> -19.9175, -43.9250             </p>             <p style="margin: 0; color: #999; font-size: 11px;">                 <b>Tipo:</b> OTIMIZADO             </p>         </div>         </div>`)[0];
+                popup_1cf6c2d2f0c43a1c19b11083e98a94f0.setContent(html_5147563fc809206e02981880fec2300f);
+            
+        
+
+        circle_marker_370043c95ace3df86973a54913ad7212.bindPopup(popup_1cf6c2d2f0c43a1c19b11083e98a94f0)
+        ;
+
+        
+    
+    
+            circle_marker_370043c95ace3df86973a54913ad7212.bindTooltip(
+                `<div>
+                     Semaforo 3
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_12fce48bae3ca4efc6ffe35790517b22 = L.circleMarker(
+                [-19.9145, -43.9215],
+                {"bubblingMouseEvents": true, "color": "#f39c12", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#f39c12", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1, "radius": 14, "stroke": true, "weight": 3}
+            ).addTo(map_df2b66010671adc8404b8a22532d5702);
+        
+    
+        var popup_5a1f77c0e7fed1a46ed95d6753d13eca = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_2b02514896b0c34d7bf20f8396a86d8f = $(`<div id="html_2b02514896b0c34d7bf20f8396a86d8f" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial; width: 220px; padding: 10px;">             <h3 style="margin: 0 0 8px 0; color: #333; font-size: 14px;">                 Savassi             </h3>             <p style="margin: 0 0 5px 0; color: #666; font-size: 12px;">                 <b>Localizacao:</b> Rua Inconfidentes             </p>             <p style="margin: 0 0 5px 0; color: #666; font-size: 12px;">                 <b>Coordenadas:</b> -19.9145, -43.9215             </p>             <p style="margin: 0; color: #999; font-size: 11px;">                 <b>Tipo:</b> PASSAGEM             </p>         </div>         </div>`)[0];
+                popup_5a1f77c0e7fed1a46ed95d6753d13eca.setContent(html_2b02514896b0c34d7bf20f8396a86d8f);
+            
+        
+
+        circle_marker_12fce48bae3ca4efc6ffe35790517b22.bindPopup(popup_5a1f77c0e7fed1a46ed95d6753d13eca)
+        ;
+
+        
+    
+    
+            circle_marker_12fce48bae3ca4efc6ffe35790517b22.bindTooltip(
+                `<div>
+                     Savassi
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_5bd6b1ba290622aca423ea06ed162cd2 = L.circleMarker(
+                [-19.912, -43.919],
+                {"bubblingMouseEvents": true, "color": "#3498db", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#3498db", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1, "radius": 14, "stroke": true, "weight": 3}
+            ).addTo(map_df2b66010671adc8404b8a22532d5702);
+        
+    
+        var popup_c4afdf801affa696f80460643652820a = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_779e3978f829aaa5a0cfc72c28365258 = $(`<div id="html_779e3978f829aaa5a0cfc72c28365258" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial; width: 220px; padding: 10px;">             <h3 style="margin: 0 0 8px 0; color: #333; font-size: 14px;">                 Semaforo 4             </h3>             <p style="margin: 0 0 5px 0; color: #666; font-size: 12px;">                 <b>Localizacao:</b> Av. Brasil             </p>             <p style="margin: 0 0 5px 0; color: #666; font-size: 12px;">                 <b>Coordenadas:</b> -19.9120, -43.9190             </p>             <p style="margin: 0; color: #999; font-size: 11px;">                 <b>Tipo:</b> OTIMIZADO             </p>         </div>         </div>`)[0];
+                popup_c4afdf801affa696f80460643652820a.setContent(html_779e3978f829aaa5a0cfc72c28365258);
+            
+        
+
+        circle_marker_5bd6b1ba290622aca423ea06ed162cd2.bindPopup(popup_c4afdf801affa696f80460643652820a)
+        ;
+
+        
+    
+    
+            circle_marker_5bd6b1ba290622aca423ea06ed162cd2.bindTooltip(
+                `<div>
+                     Semaforo 4
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_ee6082ee924cafc2a9961fe8131100bd = L.circleMarker(
+                [-19.9085, -43.916],
+                {"bubblingMouseEvents": true, "color": "#f39c12", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#f39c12", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1, "radius": 14, "stroke": true, "weight": 3}
+            ).addTo(map_df2b66010671adc8404b8a22532d5702);
+        
+    
+        var popup_0be02dfdea71d92753963fe943eae407 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_d1dc93aecb11b07d79662c231d29d9b0 = $(`<div id="html_d1dc93aecb11b07d79662c231d29d9b0" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial; width: 220px; padding: 10px;">             <h3 style="margin: 0 0 8px 0; color: #333; font-size: 14px;">                 Lourdes             </h3>             <p style="margin: 0 0 5px 0; color: #666; font-size: 12px;">                 <b>Localizacao:</b> Via Brasil             </p>             <p style="margin: 0 0 5px 0; color: #666; font-size: 12px;">                 <b>Coordenadas:</b> -19.9085, -43.9160             </p>             <p style="margin: 0; color: #999; font-size: 11px;">                 <b>Tipo:</b> PASSAGEM             </p>         </div>         </div>`)[0];
+                popup_0be02dfdea71d92753963fe943eae407.setContent(html_d1dc93aecb11b07d79662c231d29d9b0);
+            
+        
+
+        circle_marker_ee6082ee924cafc2a9961fe8131100bd.bindPopup(popup_0be02dfdea71d92753963fe943eae407)
+        ;
+
+        
+    
+    
+            circle_marker_ee6082ee924cafc2a9961fe8131100bd.bindTooltip(
+                `<div>
+                     Lourdes
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_4f675e81450d23b24192e8f25c872c27 = L.circleMarker(
+                [-19.905, -43.913],
+                {"bubblingMouseEvents": true, "color": "#3498db", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#3498db", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1, "radius": 14, "stroke": true, "weight": 3}
+            ).addTo(map_df2b66010671adc8404b8a22532d5702);
+        
+    
+        var popup_170432091303d0cf17dd88675ce17f70 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_4692a8a97ad947a02b7d0630c2a57f8f = $(`<div id="html_4692a8a97ad947a02b7d0630c2a57f8f" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial; width: 220px; padding: 10px;">             <h3 style="margin: 0 0 8px 0; color: #333; font-size: 14px;">                 Semaforo 5             </h3>             <p style="margin: 0 0 5px 0; color: #666; font-size: 12px;">                 <b>Localizacao:</b> Av. Cristovao Colombo             </p>             <p style="margin: 0 0 5px 0; color: #666; font-size: 12px;">                 <b>Coordenadas:</b> -19.9050, -43.9130             </p>             <p style="margin: 0; color: #999; font-size: 11px;">                 <b>Tipo:</b> OTIMIZADO             </p>         </div>         </div>`)[0];
+                popup_170432091303d0cf17dd88675ce17f70.setContent(html_4692a8a97ad947a02b7d0630c2a57f8f);
+            
+        
+
+        circle_marker_4f675e81450d23b24192e8f25c872c27.bindPopup(popup_170432091303d0cf17dd88675ce17f70)
+        ;
+
+        
+    
+    
+            circle_marker_4f675e81450d23b24192e8f25c872c27.bindTooltip(
+                `<div>
+                     Semaforo 5
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_4ecf0f339bbe6583d4560daf32de649a = L.circleMarker(
+                [-19.902, -43.91],
+                {"bubblingMouseEvents": true, "color": "#e74c3c", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#e74c3c", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1, "radius": 14, "stroke": true, "weight": 3}
+            ).addTo(map_df2b66010671adc8404b8a22532d5702);
+        
+    
+        var popup_d3c9cae92b9270d53404b114af78e1eb = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_c8df597f62e76ff6b5b9d86babe32b7a = $(`<div id="html_c8df597f62e76ff6b5b9d86babe32b7a" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial; width: 220px; padding: 10px;">             <h3 style="margin: 0 0 8px 0; color: #333; font-size: 14px;">                 Funcionarios             </h3>             <p style="margin: 0 0 5px 0; color: #666; font-size: 12px;">                 <b>Localizacao:</b> Av. Cristovao Colombo             </p>             <p style="margin: 0 0 5px 0; color: #666; font-size: 12px;">                 <b>Coordenadas:</b> -19.9020, -43.9100             </p>             <p style="margin: 0; color: #999; font-size: 11px;">                 <b>Tipo:</b> FIM             </p>         </div>         </div>`)[0];
+                popup_d3c9cae92b9270d53404b114af78e1eb.setContent(html_c8df597f62e76ff6b5b9d86babe32b7a);
+            
+        
+
+        circle_marker_4ecf0f339bbe6583d4560daf32de649a.bindPopup(popup_d3c9cae92b9270d53404b114af78e1eb)
+        ;
+
+        
+    
+    
+            circle_marker_4ecf0f339bbe6583d4560daf32de649a.bindTooltip(
+                `<div>
+                     Funcionarios
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var poly_line_4f31dab723a6e807e200e5b27ca6c37d = L.polyline(
+                [[-19.9289, -43.9348], [-19.9285, -43.934], [-19.928, -43.9335], [-19.9275, -43.933], [-19.9268, -43.9325], [-19.9265, -43.932], [-19.9255, -43.9305], [-19.9245, -43.929], [-19.9235, -43.9285], [-19.9225, -43.9282], [-19.9215, -43.928], [-19.9205, -43.927], [-19.9195, -43.926], [-19.9185, -43.9255], [-19.9177, -43.925], [-19.917, -43.9235], [-19.916, -43.9225], [-19.915, -43.9218], [-19.9145, -43.9215], [-19.914, -43.9205], [-19.913, -43.9195], [-19.9125, -43.919], [-19.9115, -43.918], [-19.91, -43.917], [-19.909, -43.9163], [-19.9085, -43.916], [-19.907, -43.915], [-19.906, -43.9145], [-19.9052, -43.9138], [-19.905, -43.913], [-19.904, -43.912], [-19.903, -43.911], [-19.902, -43.91]],
+                {"bubblingMouseEvents": true, "color": "#6366f1", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#6366f1", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.8, "smoothFactor": 1.0, "stroke": true, "weight": 4}
+            ).addTo(map_df2b66010671adc8404b8a22532d5702);
+        
+    
+        var popup_f7b63ae08e1c09633c2d0bb2832f00a4 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_06b826a0e9a35baa0430a8d51695261f = $(`<div id="html_06b826a0e9a35baa0430a8d51695261f" style="width: 100.0%; height: 100.0%;">Rota otimizada - Seguindo as ruas reais de BH</div>`)[0];
+                popup_f7b63ae08e1c09633c2d0bb2832f00a4.setContent(html_06b826a0e9a35baa0430a8d51695261f);
+            
+        
+
+        poly_line_4f31dab723a6e807e200e5b27ca6c37d.bindPopup(popup_f7b63ae08e1c09633c2d0bb2832f00a4)
+        ;
+
+        
+    
+    
+            L.control.fullscreen(
+                {
+  "position": "topleft",
+  "title": "Full Screen",
+  "titleCancel": "Exit Full Screen",
+  "forceSeparateButton": false,
+}
+            ).addTo(map_df2b66010671adc8404b8a22532d5702);
+        
+    
+            var layer_control_943f3473d3127b085146801d44d13542_layers = {
+                base_layers : {
+                    "https://tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png" : tile_layer_c11739e82ae2c062b87298a759f08174,
+                },
+                overlays :  {
+                    "TomTom Traffic (Tempo Real)" : tile_layer_9fd416761cd0fa7638d7f1f4d622e63d,
+                },
+            };
+            let layer_control_943f3473d3127b085146801d44d13542 = L.control.layers(
+                layer_control_943f3473d3127b085146801d44d13542_layers.base_layers,
+                layer_control_943f3473d3127b085146801d44d13542_layers.overlays,
+                {
+  "position": "topright",
+  "collapsed": true,
+  "autoZIndex": true,
+}
+            ).addTo(map_df2b66010671adc8404b8a22532d5702);
+
+        
+</script>
+</html>

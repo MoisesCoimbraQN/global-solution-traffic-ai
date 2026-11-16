@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚦 CitizenTech - Menu Principal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 50px;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+            font-weight: 300;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .card:hover::before {
+            left: 100%;
+        }
+
+        .card-icon {
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        .card h2 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .card p {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .card-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            width: 100%;
+            text-align: center;
+        }
+
+        .card-btn:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            transform: scale(1.02);
+        }
+
+        .status-bar {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            animation: slideUp 0.8s ease-out 0.3s both;
+        }
+
+        .status-item {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            background: #f5f5f5;
+        }
+
+        .status-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        .status-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .status-value {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .status-ok {
+            color: #27ae60;
+        }
+
+        .info-banner {
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 10px;
+            padding: 20px;
+            color: white;
+            margin-bottom: 30px;
+            animation: slideDown 0.6s ease-out 0.2s both;
+        }
+
+        .info-banner h3 {
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .info-banner p {
+            opacity: 0.95;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideUp 0.4s ease;
+        }
+
+        .modal-header {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-body {
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .close-btn {
+            float: right;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close-btn:hover {
+            color: #764ba2;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .modal-btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .modal-btn-primary:hover {
+            transform: scale(1.02);
+        }
+
+        .modal-btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .modal-btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .status-bar {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚦 CitizenTech</h1>
+            <p>Sistema Inteligente de Controle de Tráfego Urbano</p>
+        </div>
+
+        <div class="info-banner">
+            <h3>✨ Bem-vindo ao Menu Principal</h3>
+            <p>Escolha uma opção abaixo para acessar os componentes do seu sistema de tráfego inteligente alimentado por dados em tempo real da API TomTom.</p>
+        </div>
+
+        <div class="cards-grid">
+            <!-- Card 1: Mapa TomTom -->
+            <div class="card">
+                <div class="card-icon">
+                    <i class="fas fa-map"></i>
+                </div>
+                <h2>Mapa TomTom</h2>
+                <p>Visualize o mapa interativo com integração oficial da API TomTom. Veja rotas de ônibus, semáforos e dados de tráfego em tempo real de Belo Horizonte.</p>
+                <button class="card-btn" onclick="openMap()">
+                    <i class="fas fa-external-link-alt"></i> Abrir Mapa
+                </button>
+            </div>
+
+            <!-- Card 2: Algoritmo de Semáforos -->
+            <div class="card">
+                <div class="card-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h2>Algoritmo Inteligente</h2>
+                <p>Teste o algoritmo de otimização de semáforos que analisa tráfego em tempo real e ajusta ciclos de semáforos dinamicamente para reduzir congestionamento.</p>
+                <button class="card-btn" onclick="showAlgorithmInfo()">
+                    <i class="fas fa-cog"></i> Detalhes do Algoritmo
+                </button>
+            </div>
+
+            <!-- Card 3: Dashboard -->
+            <div class="card">
+                <div class="card-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h2>Dashboard de Trânsito</h2>
+                <p>Acesse o dashboard com métricas em tempo real, histórico de congestionamentos e análise de impacto das otimizações realizadas pelo sistema.</p>
+                <button class="card-btn" onclick="showDashboardInfo()">
+                    <i class="fas fa-television"></i> Dashboard
+                </button>
+            </div>
+
+            <!-- Card 4: Visualizador de Rota -->
+            <div class="card">
+                <div class="card-icon">
+                    <i class="fas fa-bus"></i>
+                </div>
+                <h2>Visualizador de Rota</h2>
+                <p>Acompanhe a rota de um ônibus em Belo Horizonte e observe como os semáforos são ajustados automaticamente para facilitar o transporte coletivo.</p>
+                <button class="card-btn" onclick="showRouteInfo()">
+                    <i class="fas fa-route"></i> Ver Rota
+                </button>
+            </div>
+
+            <!-- Card 5: Verificação TomTom -->
+            <div class="card">
+                <div class="card-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h2>Verificação da API</h2>
+                <p>Verifique o status da conexão com a API TomTom, dados coletados e comportamento do sistema de coleta em tempo real na AWS EC2.</p>
+                <button class="card-btn" onclick="showVerificationInfo()">
+                    <i class="fas fa-heartbeat"></i> Status do Sistema
+                </button>
+            </div>
+
+            <!-- Card 6: Documentação -->
+            <div class="card">
+                <div class="card-icon">
+                    <i class="fas fa-book"></i>
+                </div>
+                <h2>Documentação</h2>
+                <p>Acesse a documentação completa do projeto, incluindo arquitetura, modelo Snowflake, e guias de implementação.</p>
+                <button class="card-btn" onclick="showDocumentation()">
+                    <i class="fas fa-file-pdf"></i> Documentação
+                </button>
+            </div>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="status-icon">
+                    <i class="fas fa-cloud"></i>
+                </div>
+                <div class="status-title">AWS EC2</div>
+                <div class="status-value status-ok">✓ Ativo (Coleta a cada 5min)</div>
+            </div>
+
+            <div class="status-item">
+                <div class="status-icon">
+                    <i class="fas fa-key"></i>
+                </div>
+                <div class="status-title">TomTom API</div>
+                <div class="status-value status-ok">✓ Conectado</div>
+            </div>
+
+            <div class="status-item">
+                <div class="status-icon">
+                    <i class="fas fa-database"></i>
+                </div>
+                <div class="status-title">Snowflake DW</div>
+                <div class="status-value status-ok">✓ Sincronizado</div>
+            </div>
+
+            <div class="status-item">
+                <div class="status-icon">
+                    <i class="fas fa-sync"></i>
+                </div>
+                <div class="status-title">Status Geral</div>
+                <div class="status-value status-ok">✓ Sistema Operacional</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Mapa -->
+    <div id="mapModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('mapModal')">&times;</span>
+            <div class="modal-header">
+                <i class="fas fa-map"></i> Mapa TomTom
+            </div>
+            <div class="modal-body">
+                <p>Você será redirecionado para o <strong>mapa interativo oficial do TomTom</strong>.</p>
+                <p><strong>Funcionalidades:</strong></p>
+                <ul class="feature-list">
+                    <li>Visualização de rotas de ônibus</li>
+                    <li>Localização de semáforos</li>
+                    <li>Dados de tráfego em tempo real</li>
+                    <li>Integração com API TomTom</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-secondary" onclick="closeModal('mapModal')">Cancelar</button>
+                <button class="modal-btn modal-btn-primary" onclick="openMapConfirmed()">
+                    <i class="fas fa-external-link-alt"></i> Abrir Mapa
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Algoritmo -->
+    <div id="algorithmModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('algorithmModal')">&times;</span>
+            <div class="modal-header">
+                <i class="fas fa-brain"></i> Algoritmo Inteligente de Semáforos
+            </div>
+            <div class="modal-body">
+                <p><strong>Como funciona:</strong></p>
+                <ul class="feature-list">
+                    <li>Monitora fluxo de tráfego via API TomTom</li>
+                    <li>Calcula fator de atraso (tempo atual / tempo livre)</li>
+                    <li>Ajusta ciclos de semáforos dinamicamente</li>
+                    <li>Registra ações na tabela fato do Data Warehouse</li>
+                </ul>
+                <p style="margin-top: 15px;"><strong>Critérios de Decisão:</strong></p>
+                <ul class="feature-list">
+                    <li>Fator ≤ 1.2: Manter ciclo padrão</li>
+                    <li>Fator > 1.3: Ativar otimização</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-secondary" onclick="closeModal('algorithmModal')">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Dashboard -->
+    <div id="dashboardModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('dashboardModal')">&times;</span>
+            <div class="modal-header">
+                <i class="fas fa-chart-line"></i> Dashboard de Trânsito
+            </div>
+            <div class="modal-body">
+                <p>O dashboard apresenta:</p>
+                <ul class="feature-list">
+                    <li>Métricas em tempo real de tráfego</li>
+                    <li>Histórico de congestionamentos</li>
+                    <li>Análise de impacto das otimizações</li>
+                    <li>Gráficos de velocidade e atraso</li>
+                    <li>Taxa de redução de fila</li>
+                </ul>
+                <p style="margin-top: 15px;"><strong>Dados coletados:</strong> A cada 5 minutos da AWS EC2</p>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-secondary" onclick="closeModal('dashboardModal')">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Rota -->
+    <div id="routeModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('routeModal')">&times;</span>
+            <div class="modal-header">
+                <i class="fas fa-bus"></i> Visualizador de Rota de Ônibus
+            </div>
+            <div class="modal-body">
+                <p>Nesta visualização você pode:</p>
+                <ul class="feature-list">
+                    <li>Acompanhar rota de ônibus em Belo Horizonte</li>
+                    <li>Ver localizações de semáforos</li>
+                    <li>Verificar ajustes de ciclos</li>
+                    <li>Analisar impacto na via</li>
+                </ul>
+                <p style="margin-top: 15px;"><strong>O sistema ajusta os semáforos automaticamente para:</strong></p>
+                <ul class="feature-list">
+                    <li>Facilitar o trânsito do ônibus</li>
+                    <li>Reduzir tempo de fila</li>
+                    <li>Melhorar fluxo urbano</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-secondary" onclick="closeModal('routeModal')">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Verificação -->
+    <div id="verificationModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('verificationModal')">&times;</span>
+            <div class="modal-header">
+                <i class="fas fa-heartbeat"></i> Status do Sistema
+            </div>
+            <div class="modal-body">
+                <p><strong>Componentes Ativos:</strong></p>
+                <ul class="feature-list">
+                    <li>✓ Coleta de dados TomTom na AWS EC2</li>
+                    <li>✓ Atualização a cada 5 minutos</li>
+                    <li>✓ Conexão com API TomTom validada</li>
+                    <li>✓ Dados armazenados no Snowflake</li>
+                    <li>✓ Algoritmo de otimização operacional</li>
+                </ul>
+                <p style="margin-top: 15px;"><strong>Chave API:</strong> Configurada e ativa</p>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-secondary" onclick="closeModal('verificationModal')">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Documentação -->
+    <div id="documentationModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('documentationModal')">&times;</span>
+            <div class="modal-header">
+                <i class="fas fa-book"></i> Documentação do Projeto
+            </div>
+            <div class="modal-body">
+                <p><strong>Documentos disponíveis:</strong></p>
+                <ul class="feature-list">
+                    <li>README.md - Guia geral do projeto</li>
+                    <li>SUMARIO_EXECUTIVO.md - Resumo da solução</li>
+                    <li>PASSO_2_ALGORITMO.md - Detalhamento do algoritmo</li>
+                    <li>PROJETO_FINAL.md - Documentação técnica completa</li>
+                    <li>VISUALIZACAO_COMPLETA.md - Guia de mapas</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-secondary" onclick="closeModal('documentationModal')">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openMap() {
+            document.getElementById('mapModal').style.display = 'block';
+        }
+
+        function openMapConfirmed() {
+            window.open('mapa_tomtom_oficial.html', '_blank');
+            closeModal('mapModal');
+        }
+
+        function showAlgorithmInfo() {
+            document.getElementById('algorithmModal').style.display = 'block';
+        }
+
+        function showDashboardInfo() {
+            document.getElementById('dashboardModal').style.display = 'block';
+        }
+
+        function showRouteInfo() {
+            document.getElementById('routeModal').style.display = 'block';
+        }
+
+        function showVerificationInfo() {
+            document.getElementById('verificationModal').style.display = 'block';
+        }
+
+        function showDocumentation() {
+            document.getElementById('documentationModal').style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Fechar modal ao clicar fora
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

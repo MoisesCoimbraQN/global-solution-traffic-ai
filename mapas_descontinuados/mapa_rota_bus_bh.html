@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    
+        <script>
+            L_NO_TOUCH = false;
+            L_DISABLE_3D = false;
+        </script>
+    
+    <style>html, body {width: 100%;height: 100%;margin: 0;padding: 0;}</style>
+    <style>#map {position:absolute;top:0;bottom:0;right:0;left:0;}</style>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_0913f1737d7c1b26d7622a2db7b6b9c9 {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+        
+</head>
+<body>
+    
+    
+        <div style="position: fixed; 
+                    bottom: 50px; right: 50px; width: 250px; height: auto; 
+                    background-color: white; border:2px solid grey; z-index:9999; 
+                    font-size:12px; padding: 10px; border-radius: 5px;">
+            <b>🚌 Legenda - Otimização de Semáforos</b>
+            <hr style="margin: 5px 0;">
+            
+            <i style="background: #2ecc71; padding: 2px 8px; border-radius: 3px; color: white;">●</i> 
+            <b>Verde</b> = Saída<br>
+            
+            <i style="background: #e74c3c; padding: 2px 8px; border-radius: 3px; color: white;">●</i> 
+            <b>Vermelho</b> = Chegada<br>
+            
+            <i style="background: #95a5a6; padding: 2px 8px; border-radius: 3px; color: white;">●</i> 
+            Semáforo MANTER<br>
+            
+            <i style="background: #f39c12; padding: 2px 8px; border-radius: 3px; color: white;">●</i> 
+            Semáforo AUMENTAR_VERDE (+15s)<br>
+            
+            <i style="background: #e74c3c; padding: 2px 8px; border-radius: 3px; color: white;">●</i> 
+            Semáforo ATIVAR_PRIORIDADE (+30s)<br>
+            
+            <hr style="margin: 5px 0;">
+            <b>Impacto Total:</b><br>
+            Redução de ~5-10 min no trajeto
+        </div>
+        
+    
+            <div class="folium-map" id="map_0913f1737d7c1b26d7622a2db7b6b9c9" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_0913f1737d7c1b26d7622a2db7b6b9c9 = L.map(
+                "map_0913f1737d7c1b26d7622a2db7b6b9c9",
+                {
+                    center: [-19.9167, -43.9345],
+                    crs: L.CRS.EPSG3857,
+                    zoom: 14,
+                    zoomControl: true,
+                    preferCanvas: false,
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_71d1e39712aa377400d6cf905381300d = L.tileLayer(
+                "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {"attribution": "Data by \u0026copy; \u003ca target=\"_blank\" href=\"http://openstreetmap.org\"\u003eOpenStreetMap\u003c/a\u003e, under \u003ca target=\"_blank\" href=\"http://www.openstreetmap.org/copyright\"\u003eODbL\u003c/a\u003e.", "detectRetina": false, "maxNativeZoom": 18, "maxZoom": 18, "minZoom": 0, "noWrap": false, "opacity": 1, "subdomains": "abc", "tms": false}
+            ).addTo(map_0913f1737d7c1b26d7622a2db7b6b9c9);
+        
+    
+            var poly_line_d251df514ac08dbc4a4a74a312ae12e3 = L.polyline(
+                [[-19.9167, -43.9345], [-19.918, -43.934], [-19.919, -43.9335], [-19.924, -43.935], [-19.928, -43.9355], [-19.932, -43.936], [-19.935, -43.926], [-19.936, -43.915], [-19.937, -43.91], [-19.93, -43.905], [-19.925, -43.9], [-19.92, -43.895], [-19.918, -43.92], [-19.916, -43.93], [-19.915, -43.94], [-19.9145, -43.942]],
+                {"bubblingMouseEvents": true, "color": "red", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "red", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.8, "smoothFactor": 1.0, "stroke": true, "weight": 4}
+            ).addTo(map_0913f1737d7c1b26d7622a2db7b6b9c9);
+        
+    
+        var popup_87877fc5843d5ef1e3b7375e2f5d9d70 = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_fffdc7112daec7a18d4faa12751fef85 = $(`<div id="html_fffdc7112daec7a18d4faa12751fef85" style="width: 100.0%; height: 100.0%;">Rota do Ônibus</div>`)[0];
+                popup_87877fc5843d5ef1e3b7375e2f5d9d70.setContent(html_fffdc7112daec7a18d4faa12751fef85);
+            
+        
+
+        poly_line_d251df514ac08dbc4a4a74a312ae12e3.bindPopup(popup_87877fc5843d5ef1e3b7375e2f5d9d70)
+        ;
+
+        
+    
+    
+            var marker_e2ab0cd44efdbe136b5e8d79961ff08d = L.marker(
+                [-19.9167, -43.9345],
+                {}
+            ).addTo(map_0913f1737d7c1b26d7622a2db7b6b9c9);
+        
+    
+            var icon_17068ce19509653a6149db3b8a7144bf = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "play", "iconColor": "white", "markerColor": "green", "prefix": "fa"}
+            );
+            marker_e2ab0cd44efdbe136b5e8d79961ff08d.setIcon(icon_17068ce19509653a6149db3b8a7144bf);
+        
+    
+        var popup_31ce9c1b01f86bfec32fbbcb7c0f6e80 = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_f3b96f38c1eb0d568c84bd91f75790c5 = $(`<div id="html_f3b96f38c1eb0d568c84bd91f75790c5" style="width: 100.0%; height: 100.0%;">🚌 SAÍDA - Centro de BH</div>`)[0];
+                popup_31ce9c1b01f86bfec32fbbcb7c0f6e80.setContent(html_f3b96f38c1eb0d568c84bd91f75790c5);
+            
+        
+
+        marker_e2ab0cd44efdbe136b5e8d79961ff08d.bindPopup(popup_31ce9c1b01f86bfec32fbbcb7c0f6e80)
+        ;
+
+        
+    
+    
+            marker_e2ab0cd44efdbe136b5e8d79961ff08d.bindTooltip(
+                `<div>
+                     Ponto de Partida
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_c9eb79fe4351ababe872aba2c0fb6649 = L.marker(
+                [-19.9145, -43.942],
+                {}
+            ).addTo(map_0913f1737d7c1b26d7622a2db7b6b9c9);
+        
+    
+            var icon_9b33d6f52229e01bdd7f20560184fd66 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "stop", "iconColor": "white", "markerColor": "red", "prefix": "fa"}
+            );
+            marker_c9eb79fe4351ababe872aba2c0fb6649.setIcon(icon_9b33d6f52229e01bdd7f20560184fd66);
+        
+    
+        var popup_3c6c17d4a42892044d481aafa8443ccf = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_853701cf90bdbf200f76647442f621c7 = $(`<div id="html_853701cf90bdbf200f76647442f621c7" style="width: 100.0%; height: 100.0%;">🚌 FIM - Funcionários</div>`)[0];
+                popup_3c6c17d4a42892044d481aafa8443ccf.setContent(html_853701cf90bdbf200f76647442f621c7);
+            
+        
+
+        marker_c9eb79fe4351ababe872aba2c0fb6649.bindPopup(popup_3c6c17d4a42892044d481aafa8443ccf)
+        ;
+
+        
+    
+    
+            marker_c9eb79fe4351ababe872aba2c0fb6649.bindTooltip(
+                `<div>
+                     Ponto Final
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_555d85c7cc367670f79f4ddd13c93b05 = L.marker(
+                [-19.91685003279909, -43.93463542742023],
+                {}
+            ).addTo(map_0913f1737d7c1b26d7622a2db7b6b9c9);
+        
+    
+            var icon_131c410a2d9cddb281511c1b72f12d38 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "bolt", "iconColor": "white", "markerColor": "red", "prefix": "fa"}
+            );
+            marker_555d85c7cc367670f79f4ddd13c93b05.setIcon(icon_131c410a2d9cddb281511c1b72f12d38);
+        
+    
+        var popup_c736014179e082170db3280c17129d70 = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_fea2a40ff4c614863f3abb5ea016de20 = $(`<div id="html_fea2a40ff4c614863f3abb5ea016de20" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial; width: 300px; font-size: 11px;">                 <h4 style="margin: 5px 0;">Intersecção 1</h4>                 <hr style="margin: 5px 0;">                                  <b>📊 Métricas:</b><br>                 Fator Atraso: <span style="color: red;"><b>2.72</b></span><br>                 Congestionamento: <b>81/100</b><br>                 Velocidade Bus: <b>19.4 km/h</b><br>                                  <hr style="margin: 5px 0;">                 <b>🚦 Semáforo:</b><br>                 Ação: <span style="color: red; font-weight: bold;">ATIVAR_PRIORIDADE</span><br>                 Verde Padrão: <b>60s</b><br>                 Verde Otimizado: <span style="color: green;"><b>90s</b></span><br>                 Ajuste: <b>+30s</b><br>                                  <hr style="margin: 5px 0;">                 <b>📉 Impacto:</b><br>                 Redução Fila: <b>150m</b><br>                 Status: <span style="color: green;"><b>Melhora moderada</b></span>             </div>             </div>`)[0];
+                popup_c736014179e082170db3280c17129d70.setContent(html_fea2a40ff4c614863f3abb5ea016de20);
+            
+        
+
+        marker_555d85c7cc367670f79f4ddd13c93b05.bindPopup(popup_c736014179e082170db3280c17129d70)
+        ;
+
+        
+    
+    
+            marker_555d85c7cc367670f79f4ddd13c93b05.bindTooltip(
+                `<div>
+                     Intersecção 1 - ATIVAR_PRIORIDADE
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_b7aadaefe04bcb99ce843a982f8449a5 = L.marker(
+                [-19.924290490609515, -43.9351081265021],
+                {}
+            ).addTo(map_0913f1737d7c1b26d7622a2db7b6b9c9);
+        
+    
+            var icon_07d4526844e15c4d321cd88a97c5f3d4 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "bolt", "iconColor": "white", "markerColor": "red", "prefix": "fa"}
+            );
+            marker_b7aadaefe04bcb99ce843a982f8449a5.setIcon(icon_07d4526844e15c4d321cd88a97c5f3d4);
+        
+    
+        var popup_d64d0eb9e6773fda70408dab299eee4a = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_485ab373ad20d985f5363b4a01e42cc3 = $(`<div id="html_485ab373ad20d985f5363b4a01e42cc3" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial; width: 300px; font-size: 11px;">                 <h4 style="margin: 5px 0;">Intersecção 2</h4>                 <hr style="margin: 5px 0;">                                  <b>📊 Métricas:</b><br>                 Fator Atraso: <span style="color: red;"><b>2.77</b></span><br>                 Congestionamento: <b>83/100</b><br>                 Velocidade Bus: <b>28.8 km/h</b><br>                                  <hr style="margin: 5px 0;">                 <b>🚦 Semáforo:</b><br>                 Ação: <span style="color: red; font-weight: bold;">ATIVAR_PRIORIDADE</span><br>                 Verde Padrão: <b>60s</b><br>                 Verde Otimizado: <span style="color: green;"><b>90s</b></span><br>                 Ajuste: <b>+30s</b><br>                                  <hr style="margin: 5px 0;">                 <b>📉 Impacto:</b><br>                 Redução Fila: <b>150m</b><br>                 Status: <span style="color: green;"><b>Melhora moderada</b></span>             </div>             </div>`)[0];
+                popup_d64d0eb9e6773fda70408dab299eee4a.setContent(html_485ab373ad20d985f5363b4a01e42cc3);
+            
+        
+
+        marker_b7aadaefe04bcb99ce843a982f8449a5.bindPopup(popup_d64d0eb9e6773fda70408dab299eee4a)
+        ;
+
+        
+    
+    
+            marker_b7aadaefe04bcb99ce843a982f8449a5.bindTooltip(
+                `<div>
+                     Intersecção 2 - ATIVAR_PRIORIDADE
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_1860c7284b62d264f1a5bb2b8398d601 = L.marker(
+                [-19.93538963871705, -43.92619651122367],
+                {}
+            ).addTo(map_0913f1737d7c1b26d7622a2db7b6b9c9);
+        
+    
+            var icon_69d1f914e8845d915acc76d87ae10c12 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "bolt", "iconColor": "white", "markerColor": "red", "prefix": "fa"}
+            );
+            marker_1860c7284b62d264f1a5bb2b8398d601.setIcon(icon_69d1f914e8845d915acc76d87ae10c12);
+        
+    
+        var popup_9c123452df0ce2a0fc0ec5331d3a4f23 = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_567fdecc3a07ac9cf236e4c7925d382c = $(`<div id="html_567fdecc3a07ac9cf236e4c7925d382c" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial; width: 300px; font-size: 11px;">                 <h4 style="margin: 5px 0;">Intersecção 3</h4>                 <hr style="margin: 5px 0;">                                  <b>📊 Métricas:</b><br>                 Fator Atraso: <span style="color: red;"><b>2.44</b></span><br>                 Congestionamento: <b>73/100</b><br>                 Velocidade Bus: <b>28.0 km/h</b><br>                                  <hr style="margin: 5px 0;">                 <b>🚦 Semáforo:</b><br>                 Ação: <span style="color: red; font-weight: bold;">ATIVAR_PRIORIDADE</span><br>                 Verde Padrão: <b>60s</b><br>                 Verde Otimizado: <span style="color: green;"><b>90s</b></span><br>                 Ajuste: <b>+30s</b><br>                                  <hr style="margin: 5px 0;">                 <b>📉 Impacto:</b><br>                 Redução Fila: <b>150m</b><br>                 Status: <span style="color: green;"><b>Melhora moderada</b></span>             </div>             </div>`)[0];
+                popup_9c123452df0ce2a0fc0ec5331d3a4f23.setContent(html_567fdecc3a07ac9cf236e4c7925d382c);
+            
+        
+
+        marker_1860c7284b62d264f1a5bb2b8398d601.bindPopup(popup_9c123452df0ce2a0fc0ec5331d3a4f23)
+        ;
+
+        
+    
+    
+            marker_1860c7284b62d264f1a5bb2b8398d601.bindTooltip(
+                `<div>
+                     Intersecção 3 - ATIVAR_PRIORIDADE
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_4a5599f37b9df8006d6987fcb75fe975 = L.marker(
+                [-19.930350770347406, -43.90548113155059],
+                {}
+            ).addTo(map_0913f1737d7c1b26d7622a2db7b6b9c9);
+        
+    
+            var icon_c50cdbbaf1c2531dcd1c17720081de80 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "bolt", "iconColor": "white", "markerColor": "red", "prefix": "fa"}
+            );
+            marker_4a5599f37b9df8006d6987fcb75fe975.setIcon(icon_c50cdbbaf1c2531dcd1c17720081de80);
+        
+    
+        var popup_847722e7ff522780f30644f1baa0f6ab = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_af7f8108e046eb3f76d9db7d57040141 = $(`<div id="html_af7f8108e046eb3f76d9db7d57040141" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial; width: 300px; font-size: 11px;">                 <h4 style="margin: 5px 0;">Intersecção 4</h4>                 <hr style="margin: 5px 0;">                                  <b>📊 Métricas:</b><br>                 Fator Atraso: <span style="color: red;"><b>2.21</b></span><br>                 Congestionamento: <b>66/100</b><br>                 Velocidade Bus: <b>25.9 km/h</b><br>                                  <hr style="margin: 5px 0;">                 <b>🚦 Semáforo:</b><br>                 Ação: <span style="color: red; font-weight: bold;">ATIVAR_PRIORIDADE</span><br>                 Verde Padrão: <b>60s</b><br>                 Verde Otimizado: <span style="color: green;"><b>90s</b></span><br>                 Ajuste: <b>+30s</b><br>                                  <hr style="margin: 5px 0;">                 <b>📉 Impacto:</b><br>                 Redução Fila: <b>150m</b><br>                 Status: <span style="color: green;"><b>Melhora moderada</b></span>             </div>             </div>`)[0];
+                popup_847722e7ff522780f30644f1baa0f6ab.setContent(html_af7f8108e046eb3f76d9db7d57040141);
+            
+        
+
+        marker_4a5599f37b9df8006d6987fcb75fe975.bindPopup(popup_847722e7ff522780f30644f1baa0f6ab)
+        ;
+
+        
+    
+    
+            marker_4a5599f37b9df8006d6987fcb75fe975.bindTooltip(
+                `<div>
+                     Intersecção 4 - ATIVAR_PRIORIDADE
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_22e61b65de336c4d1871325453485a72 = L.marker(
+                [-19.91828588347896, -43.92019008041788],
+                {}
+            ).addTo(map_0913f1737d7c1b26d7622a2db7b6b9c9);
+        
+    
+            var icon_935465745e16daea3d6e40eeded4d6dc = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "bolt", "iconColor": "white", "markerColor": "red", "prefix": "fa"}
+            );
+            marker_22e61b65de336c4d1871325453485a72.setIcon(icon_935465745e16daea3d6e40eeded4d6dc);
+        
+    
+        var popup_f4bc5aa39dfae0bf2bf0d20062659b52 = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_23192746631a39c0c1fd485eb9b7d121 = $(`<div id="html_23192746631a39c0c1fd485eb9b7d121" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial; width: 300px; font-size: 11px;">                 <h4 style="margin: 5px 0;">Intersecção 5</h4>                 <hr style="margin: 5px 0;">                                  <b>📊 Métricas:</b><br>                 Fator Atraso: <span style="color: red;"><b>1.93</b></span><br>                 Congestionamento: <b>57/100</b><br>                 Velocidade Bus: <b>14.0 km/h</b><br>                                  <hr style="margin: 5px 0;">                 <b>🚦 Semáforo:</b><br>                 Ação: <span style="color: red; font-weight: bold;">ATIVAR_PRIORIDADE</span><br>                 Verde Padrão: <b>60s</b><br>                 Verde Otimizado: <span style="color: green;"><b>90s</b></span><br>                 Ajuste: <b>+30s</b><br>                                  <hr style="margin: 5px 0;">                 <b>📉 Impacto:</b><br>                 Redução Fila: <b>150m</b><br>                 Status: <span style="color: green;"><b>Melhora moderada</b></span>             </div>             </div>`)[0];
+                popup_f4bc5aa39dfae0bf2bf0d20062659b52.setContent(html_23192746631a39c0c1fd485eb9b7d121);
+            
+        
+
+        marker_22e61b65de336c4d1871325453485a72.bindPopup(popup_f4bc5aa39dfae0bf2bf0d20062659b52)
+        ;
+
+        
+    
+    
+            marker_22e61b65de336c4d1871325453485a72.bindTooltip(
+                `<div>
+                     Intersecção 5 - ATIVAR_PRIORIDADE
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_04c59dba6b6cd2a589e34cd03fb6ce9d = L.marker(
+                [-19.91438538717057, -43.94191794393455],
+                {}
+            ).addTo(map_0913f1737d7c1b26d7622a2db7b6b9c9);
+        
+    
+            var icon_26332b4151130b292300432fa9577645 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "bolt", "iconColor": "white", "markerColor": "red", "prefix": "fa"}
+            );
+            marker_04c59dba6b6cd2a589e34cd03fb6ce9d.setIcon(icon_26332b4151130b292300432fa9577645);
+        
+    
+        var popup_56aa3b4f99aa0d1c9b78479df200f681 = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_7f54260b1b03bfd894e3723ff31ef4bc = $(`<div id="html_7f54260b1b03bfd894e3723ff31ef4bc" style="width: 100.0%; height: 100.0%;">             <div style="font-family: Arial; width: 300px; font-size: 11px;">                 <h4 style="margin: 5px 0;">Intersecção 6</h4>                 <hr style="margin: 5px 0;">                                  <b>📊 Métricas:</b><br>                 Fator Atraso: <span style="color: red;"><b>2.03</b></span><br>                 Congestionamento: <b>60/100</b><br>                 Velocidade Bus: <b>23.6 km/h</b><br>                                  <hr style="margin: 5px 0;">                 <b>🚦 Semáforo:</b><br>                 Ação: <span style="color: red; font-weight: bold;">ATIVAR_PRIORIDADE</span><br>                 Verde Padrão: <b>60s</b><br>                 Verde Otimizado: <span style="color: green;"><b>90s</b></span><br>                 Ajuste: <b>+30s</b><br>                                  <hr style="margin: 5px 0;">                 <b>📉 Impacto:</b><br>                 Redução Fila: <b>150m</b><br>                 Status: <span style="color: green;"><b>Melhora moderada</b></span>             </div>             </div>`)[0];
+                popup_56aa3b4f99aa0d1c9b78479df200f681.setContent(html_7f54260b1b03bfd894e3723ff31ef4bc);
+            
+        
+
+        marker_04c59dba6b6cd2a589e34cd03fb6ce9d.bindPopup(popup_56aa3b4f99aa0d1c9b78479df200f681)
+        ;
+
+        
+    
+    
+            marker_04c59dba6b6cd2a589e34cd03fb6ce9d.bindTooltip(
+                `<div>
+                     Intersecção 6 - ATIVAR_PRIORIDADE
+                 </div>`,
+                {"sticky": true}
+            );
+        
+</script>
+</html>

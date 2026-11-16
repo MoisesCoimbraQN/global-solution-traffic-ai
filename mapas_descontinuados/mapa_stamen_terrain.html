@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    
+        <script>
+            L_NO_TOUCH = false;
+            L_DISABLE_3D = false;
+        </script>
+    
+    <style>html, body {width: 100%;height: 100%;margin: 0;padding: 0;}</style>
+    <style>#map {position:absolute;top:0;bottom:0;right:0;left:0;}</style>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_c992eb5d481fcd1e6b2b01d61015c42c {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+        
+</head>
+<body>
+    
+    
+    <div style="position: fixed; 
+                bottom: 50px; right: 50px; width: 280px; height: auto; 
+                background-color: white; border:3px solid #333; z-index:9999; 
+                font-size:12px; padding: 15px; border-radius: 8px; box-shadow: 0 0 15px rgba(0,0,0,0.3);">
+        <b style="font-size: 14px;">Mapa - Stamen Terrain</b>
+        <hr style="margin: 8px 0;">
+        
+        <div style="margin: 8px 0;">
+            <i style="background: #2ecc71; padding: 4px 10px; border-radius: 3px; color: white; font-weight: bold;">SAIDA</i>
+        </div>
+        
+        <div style="margin: 8px 0;">
+            <i style="background: #3498db; padding: 4px 10px; border-radius: 3px; color: white; font-weight: bold;">OTIMIZADO</i>
+        </div>
+        
+        <div style="margin: 8px 0;">
+            <i style="background: #f39c12; padding: 4px 10px; border-radius: 3px; color: white; font-weight: bold;">PASSANDO</i>
+        </div>
+        
+        <div style="margin: 8px 0;">
+            <i style="background: #e74c3c; padding: 4px 10px; border-radius: 3px; color: white; font-weight: bold;">DESTINO</i>
+        </div>
+        
+        <hr style="margin: 8px 0;">
+        <p style="margin: 5px 0; font-size: 11px; color: #666;">
+            Provedor: Stamen Terrain
+        </p>
+    </div>
+    
+    
+            <div class="folium-map" id="map_c992eb5d481fcd1e6b2b01d61015c42c" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_c992eb5d481fcd1e6b2b01d61015c42c = L.map(
+                "map_c992eb5d481fcd1e6b2b01d61015c42c",
+                {
+                    center: [-19.9167, -43.9345],
+                    crs: L.CRS.EPSG3857,
+                    zoom: 13,
+                    zoomControl: true,
+                    preferCanvas: true,
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_fa2f3f681c5faedd0f96702e45b0bf9e = L.tileLayer(
+                "https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}.jpg",
+                {"attribution": "Map tiles by \u003ca target=\"_blank\" href=\"http://stamen.com\"\u003eStamen Design\u003c/a\u003e, under \u003ca target=\"_blank\" href=\"http://creativecommons.org/licenses/by/3.0\"\u003eCC BY 3.0\u003c/a\u003e. Data by \u0026copy; \u003ca target=\"_blank\" href=\"http://openstreetmap.org\"\u003eOpenStreetMap\u003c/a\u003e, under \u003ca target=\"_blank\" href=\"http://creativecommons.org/licenses/by-sa/3.0\"\u003eCC BY SA\u003c/a\u003e.", "detectRetina": false, "maxNativeZoom": 18, "maxZoom": 18, "minZoom": 0, "noWrap": false, "opacity": 1, "subdomains": "abc", "tms": false}
+            ).addTo(map_c992eb5d481fcd1e6b2b01d61015c42c);
+        
+    
+            var marker_3cdd24b10cbd667f5dfddd41e375e9d4 = L.marker(
+                [-19.9289, -43.9348],
+                {}
+            ).addTo(map_c992eb5d481fcd1e6b2b01d61015c42c);
+        
+    
+            var icon_381452410d7d1586eadf5cdb82c1c399 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "play", "iconColor": "white", "markerColor": "green", "prefix": "fa"}
+            );
+            marker_3cdd24b10cbd667f5dfddd41e375e9d4.setIcon(icon_381452410d7d1586eadf5cdb82c1c399);
+        
+    
+        var popup_2ba16ba08b828b54bacbc9d84050c345 = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_aa2579e5d04e6405e859bd125fe069b1 = $(`<div id="html_aa2579e5d04e6405e859bd125fe069b1" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial; width: 250px;">             <h4 style="margin: 0; color: #333;">Centro - Saida</h4>             <hr style="margin: 5px 0;">             <p style="margin: 5px 0;"><b>Status:</b> INICIO</p>             <p style="margin: 5px 0;"><b>Provedor:</b> Stamen Terrain</p>         </div>         </div>`)[0];
+                popup_2ba16ba08b828b54bacbc9d84050c345.setContent(html_aa2579e5d04e6405e859bd125fe069b1);
+            
+        
+
+        marker_3cdd24b10cbd667f5dfddd41e375e9d4.bindPopup(popup_2ba16ba08b828b54bacbc9d84050c345)
+        ;
+
+        
+    
+    
+            marker_3cdd24b10cbd667f5dfddd41e375e9d4.bindTooltip(
+                `<div>
+                     Centro - Saida
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_776f564d23b521fc58eb9398dce48f9e = L.marker(
+                [-19.9265, -43.932],
+                {}
+            ).addTo(map_c992eb5d481fcd1e6b2b01d61015c42c);
+        
+    
+            var icon_77d0a22d20aa6b92311a0be13653abe4 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "check", "iconColor": "white", "markerColor": "blue", "prefix": "fa"}
+            );
+            marker_776f564d23b521fc58eb9398dce48f9e.setIcon(icon_77d0a22d20aa6b92311a0be13653abe4);
+        
+    
+        var popup_d0edf8350718e2218d6d0773a3b1e731 = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_c69ab0aaa94c1944f977a63706046592 = $(`<div id="html_c69ab0aaa94c1944f977a63706046592" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial; width: 250px;">             <h4 style="margin: 0; color: #333;">Semaforo 1 - Av. Afonso Pena</h4>             <hr style="margin: 5px 0;">             <p style="margin: 5px 0;"><b>Status:</b> OTIMIZADO</p>             <p style="margin: 5px 0;"><b>Provedor:</b> Stamen Terrain</p>         </div>         </div>`)[0];
+                popup_d0edf8350718e2218d6d0773a3b1e731.setContent(html_c69ab0aaa94c1944f977a63706046592);
+            
+        
+
+        marker_776f564d23b521fc58eb9398dce48f9e.bindPopup(popup_d0edf8350718e2218d6d0773a3b1e731)
+        ;
+
+        
+    
+    
+            marker_776f564d23b521fc58eb9398dce48f9e.bindTooltip(
+                `<div>
+                     Semaforo 1 - Av. Afonso Pena
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_ddd08e50c3d176e70dc966a2cd5ee7a6 = L.marker(
+                [-19.921, -43.928],
+                {}
+            ).addTo(map_c992eb5d481fcd1e6b2b01d61015c42c);
+        
+    
+            var icon_91e64e5b06331c773d1df09426c854ba = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "check", "iconColor": "white", "markerColor": "blue", "prefix": "fa"}
+            );
+            marker_ddd08e50c3d176e70dc966a2cd5ee7a6.setIcon(icon_91e64e5b06331c773d1df09426c854ba);
+        
+    
+        var popup_2d0ca533e6512eec0ea56d9d59a58ade = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_6ed641c29162252dfe6e6d6ee4d3574a = $(`<div id="html_6ed641c29162252dfe6e6d6ee4d3574a" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial; width: 250px;">             <h4 style="margin: 0; color: #333;">Semaforo 2 - Av. Getulio Vargas</h4>             <hr style="margin: 5px 0;">             <p style="margin: 5px 0;"><b>Status:</b> OTIMIZADO</p>             <p style="margin: 5px 0;"><b>Provedor:</b> Stamen Terrain</p>         </div>         </div>`)[0];
+                popup_2d0ca533e6512eec0ea56d9d59a58ade.setContent(html_6ed641c29162252dfe6e6d6ee4d3574a);
+            
+        
+
+        marker_ddd08e50c3d176e70dc966a2cd5ee7a6.bindPopup(popup_2d0ca533e6512eec0ea56d9d59a58ade)
+        ;
+
+        
+    
+    
+            marker_ddd08e50c3d176e70dc966a2cd5ee7a6.bindTooltip(
+                `<div>
+                     Semaforo 2 - Av. Getulio Vargas
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_29bd9b526a449eafa88e4ad751e6895c = L.marker(
+                [-19.9175, -43.925],
+                {}
+            ).addTo(map_c992eb5d481fcd1e6b2b01d61015c42c);
+        
+    
+            var icon_a06c84eb8014d2c22896dec97b613182 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "check", "iconColor": "white", "markerColor": "blue", "prefix": "fa"}
+            );
+            marker_29bd9b526a449eafa88e4ad751e6895c.setIcon(icon_a06c84eb8014d2c22896dec97b613182);
+        
+    
+        var popup_76250cc163a29307ce2a741a2dbf6a91 = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_159695bfba695f5023b17dc4251c6e32 = $(`<div id="html_159695bfba695f5023b17dc4251c6e32" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial; width: 250px;">             <h4 style="margin: 0; color: #333;">Semaforo 3 - Rua Bahia</h4>             <hr style="margin: 5px 0;">             <p style="margin: 5px 0;"><b>Status:</b> OTIMIZADO</p>             <p style="margin: 5px 0;"><b>Provedor:</b> Stamen Terrain</p>         </div>         </div>`)[0];
+                popup_76250cc163a29307ce2a741a2dbf6a91.setContent(html_159695bfba695f5023b17dc4251c6e32);
+            
+        
+
+        marker_29bd9b526a449eafa88e4ad751e6895c.bindPopup(popup_76250cc163a29307ce2a741a2dbf6a91)
+        ;
+
+        
+    
+    
+            marker_29bd9b526a449eafa88e4ad751e6895c.bindTooltip(
+                `<div>
+                     Semaforo 3 - Rua Bahia
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_b4360ed8d79c7b7498183757c92e8b63 = L.marker(
+                [-19.9145, -43.9215],
+                {}
+            ).addTo(map_c992eb5d481fcd1e6b2b01d61015c42c);
+        
+    
+            var icon_a11431d28a43f41b385954c9efff4054 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "arrow-right", "iconColor": "white", "markerColor": "orange", "prefix": "fa"}
+            );
+            marker_b4360ed8d79c7b7498183757c92e8b63.setIcon(icon_a11431d28a43f41b385954c9efff4054);
+        
+    
+        var popup_aa53dd7e43f58e4d4d24a6be517a587f = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_e6af1adbbff98c612c4065ed77ce510b = $(`<div id="html_e6af1adbbff98c612c4065ed77ce510b" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial; width: 250px;">             <h4 style="margin: 0; color: #333;">Savassi - Rua Inconfidentes</h4>             <hr style="margin: 5px 0;">             <p style="margin: 5px 0;"><b>Status:</b> PASSANDO</p>             <p style="margin: 5px 0;"><b>Provedor:</b> Stamen Terrain</p>         </div>         </div>`)[0];
+                popup_aa53dd7e43f58e4d4d24a6be517a587f.setContent(html_e6af1adbbff98c612c4065ed77ce510b);
+            
+        
+
+        marker_b4360ed8d79c7b7498183757c92e8b63.bindPopup(popup_aa53dd7e43f58e4d4d24a6be517a587f)
+        ;
+
+        
+    
+    
+            marker_b4360ed8d79c7b7498183757c92e8b63.bindTooltip(
+                `<div>
+                     Savassi - Rua Inconfidentes
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_22c11b263bdcf9cbcc7990c58ae82866 = L.marker(
+                [-19.912, -43.919],
+                {}
+            ).addTo(map_c992eb5d481fcd1e6b2b01d61015c42c);
+        
+    
+            var icon_168254ec52f7c888dca22a4c182624bd = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "check", "iconColor": "white", "markerColor": "blue", "prefix": "fa"}
+            );
+            marker_22c11b263bdcf9cbcc7990c58ae82866.setIcon(icon_168254ec52f7c888dca22a4c182624bd);
+        
+    
+        var popup_9db528c9ea2a1f707a8515602700ca99 = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_91ac4a33ad93425bbaf08dcc7f955acb = $(`<div id="html_91ac4a33ad93425bbaf08dcc7f955acb" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial; width: 250px;">             <h4 style="margin: 0; color: #333;">Semaforo 4 - Av. Brasil</h4>             <hr style="margin: 5px 0;">             <p style="margin: 5px 0;"><b>Status:</b> OTIMIZADO</p>             <p style="margin: 5px 0;"><b>Provedor:</b> Stamen Terrain</p>         </div>         </div>`)[0];
+                popup_9db528c9ea2a1f707a8515602700ca99.setContent(html_91ac4a33ad93425bbaf08dcc7f955acb);
+            
+        
+
+        marker_22c11b263bdcf9cbcc7990c58ae82866.bindPopup(popup_9db528c9ea2a1f707a8515602700ca99)
+        ;
+
+        
+    
+    
+            marker_22c11b263bdcf9cbcc7990c58ae82866.bindTooltip(
+                `<div>
+                     Semaforo 4 - Av. Brasil
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_31e4a327ddf575b80210605c4ec98cab = L.marker(
+                [-19.9085, -43.916],
+                {}
+            ).addTo(map_c992eb5d481fcd1e6b2b01d61015c42c);
+        
+    
+            var icon_c53e7ad3e3266a28be2bdf95106c4e81 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "arrow-right", "iconColor": "white", "markerColor": "orange", "prefix": "fa"}
+            );
+            marker_31e4a327ddf575b80210605c4ec98cab.setIcon(icon_c53e7ad3e3266a28be2bdf95106c4e81);
+        
+    
+        var popup_87d854965347e6105c35c0826002b929 = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_e56fc417a7f4e8eab6e623b99835b928 = $(`<div id="html_e56fc417a7f4e8eab6e623b99835b928" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial; width: 250px;">             <h4 style="margin: 0; color: #333;">Lourdes - Via Brasil</h4>             <hr style="margin: 5px 0;">             <p style="margin: 5px 0;"><b>Status:</b> PASSANDO</p>             <p style="margin: 5px 0;"><b>Provedor:</b> Stamen Terrain</p>         </div>         </div>`)[0];
+                popup_87d854965347e6105c35c0826002b929.setContent(html_e56fc417a7f4e8eab6e623b99835b928);
+            
+        
+
+        marker_31e4a327ddf575b80210605c4ec98cab.bindPopup(popup_87d854965347e6105c35c0826002b929)
+        ;
+
+        
+    
+    
+            marker_31e4a327ddf575b80210605c4ec98cab.bindTooltip(
+                `<div>
+                     Lourdes - Via Brasil
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_5abf1dec358788640367befe6b1de5fb = L.marker(
+                [-19.905, -43.913],
+                {}
+            ).addTo(map_c992eb5d481fcd1e6b2b01d61015c42c);
+        
+    
+            var icon_c532d65833e126b1be53d93bb9e0861c = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "check", "iconColor": "white", "markerColor": "blue", "prefix": "fa"}
+            );
+            marker_5abf1dec358788640367befe6b1de5fb.setIcon(icon_c532d65833e126b1be53d93bb9e0861c);
+        
+    
+        var popup_d7006da5c55183b03103967ec400f07a = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_24b7ea6b2bbb2e61b8042edad1bbb26a = $(`<div id="html_24b7ea6b2bbb2e61b8042edad1bbb26a" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial; width: 250px;">             <h4 style="margin: 0; color: #333;">Semaforo 5 - Av. Cristovao Colombo</h4>             <hr style="margin: 5px 0;">             <p style="margin: 5px 0;"><b>Status:</b> OTIMIZADO</p>             <p style="margin: 5px 0;"><b>Provedor:</b> Stamen Terrain</p>         </div>         </div>`)[0];
+                popup_d7006da5c55183b03103967ec400f07a.setContent(html_24b7ea6b2bbb2e61b8042edad1bbb26a);
+            
+        
+
+        marker_5abf1dec358788640367befe6b1de5fb.bindPopup(popup_d7006da5c55183b03103967ec400f07a)
+        ;
+
+        
+    
+    
+            marker_5abf1dec358788640367befe6b1de5fb.bindTooltip(
+                `<div>
+                     Semaforo 5 - Av. Cristovao Colombo
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_55288e2a1714f5c132a0a20abbd035c4 = L.marker(
+                [-19.902, -43.91],
+                {}
+            ).addTo(map_c992eb5d481fcd1e6b2b01d61015c42c);
+        
+    
+            var icon_f9c9d949f6e1baf1c094fb4c55febec3 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "stop", "iconColor": "white", "markerColor": "red", "prefix": "fa"}
+            );
+            marker_55288e2a1714f5c132a0a20abbd035c4.setIcon(icon_f9c9d949f6e1baf1c094fb4c55febec3);
+        
+    
+        var popup_4cd8d1f19bb57a82de4302d416928c5a = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_539b46966c462dbbcf126ad8c8254b85 = $(`<div id="html_539b46966c462dbbcf126ad8c8254b85" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial; width: 250px;">             <h4 style="margin: 0; color: #333;">Funcionarios - Destino</h4>             <hr style="margin: 5px 0;">             <p style="margin: 5px 0;"><b>Status:</b> FIM</p>             <p style="margin: 5px 0;"><b>Provedor:</b> Stamen Terrain</p>         </div>         </div>`)[0];
+                popup_4cd8d1f19bb57a82de4302d416928c5a.setContent(html_539b46966c462dbbcf126ad8c8254b85);
+            
+        
+
+        marker_55288e2a1714f5c132a0a20abbd035c4.bindPopup(popup_4cd8d1f19bb57a82de4302d416928c5a)
+        ;
+
+        
+    
+    
+            marker_55288e2a1714f5c132a0a20abbd035c4.bindTooltip(
+                `<div>
+                     Funcionarios - Destino
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var poly_line_b633a7ab7219b2d05f896315ac31a786 = L.polyline(
+                [[-19.9289, -43.9348], [-19.9265, -43.932], [-19.921, -43.928], [-19.9175, -43.925], [-19.9145, -43.9215], [-19.912, -43.919], [-19.9085, -43.916], [-19.905, -43.913], [-19.902, -43.91]],
+                {"bubblingMouseEvents": true, "color": "#FF6B6B", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#FF6B6B", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.8, "smoothFactor": 1.0, "stroke": true, "weight": 4}
+            ).addTo(map_c992eb5d481fcd1e6b2b01d61015c42c);
+        
+</script>
+</html>

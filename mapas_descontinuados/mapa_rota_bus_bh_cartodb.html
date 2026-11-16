@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    
+        <script>
+            L_NO_TOUCH = false;
+            L_DISABLE_3D = false;
+        </script>
+    
+    <style>html, body {width: 100%;height: 100%;margin: 0;padding: 0;}</style>
+    <style>#map {position:absolute;top:0;bottom:0;right:0;left:0;}</style>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_1076b23f393131e462499fbf643921ea {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+        
+</head>
+<body>
+    
+    
+<div style="position: fixed; 
+            bottom: 50px; right: 50px; width: 280px; height: auto; 
+            background-color: white; border:3px solid #333; z-index:9999; 
+            font-size:12px; padding: 15px; border-radius: 8px; box-shadow: 0 0 15px rgba(0,0,0,0.3);">
+    <b style="font-size: 14px;">🚌 Legenda - Rota Otimizada</b>
+    <hr style="margin: 8px 0;">
+    
+    <div style="margin: 8px 0;">
+        <i style="background: #2ecc71; padding: 4px 10px; border-radius: 3px; color: white; font-weight: bold;">●</i>
+        <b>Verde</b> = Ponto de Saída
+    </div>
+    
+    <div style="margin: 8px 0;">
+        <i style="background: #3498db; padding: 4px 10px; border-radius: 3px; color: white; font-weight: bold;">✓</i>
+        <b>Azul</b> = Semáforo Otimizado
+    </div>
+    
+    <div style="margin: 8px 0;">
+        <i style="background: #f39c12; padding: 4px 10px; border-radius: 3px; color: white; font-weight: bold;">→</i>
+        <b>Laranja</b> = Passando
+    </div>
+    
+    <div style="margin: 8px 0;">
+        <i style="background: #e74c3c; padding: 4px 10px; border-radius: 3px; color: white; font-weight: bold;">⬛</i>
+        <b>Vermelho</b> = Destino
+    </div>
+    
+    <hr style="margin: 8px 0;">
+    <p style="margin: 5px 0; font-size: 11px; color: #666;">
+        <b>Impacto Total:</b><br>
+        • 180 segundos ganhos<br>
+        • 900m fila reduzida<br>
+        • ~2.1 minutos economizados
+    </p>
+</div>
+    
+            <div class="folium-map" id="map_1076b23f393131e462499fbf643921ea" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_1076b23f393131e462499fbf643921ea = L.map(
+                "map_1076b23f393131e462499fbf643921ea",
+                {
+                    center: [-19.9167, -43.9345],
+                    crs: L.CRS.EPSG3857,
+                    zoom: 13,
+                    zoomControl: true,
+                    preferCanvas: true,
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_27849b9c38cdcec45fa0746d5ebe17f8 = L.tileLayer(
+                "https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png",
+                {"attribution": "\u0026copy; \u003ca target=\"_blank\" href=\"http://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors \u0026copy; \u003ca target=\"_blank\" href=\"http://cartodb.com/attributions\"\u003eCartoDB\u003c/a\u003e, CartoDB \u003ca target=\"_blank\" href =\"http://cartodb.com/attributions\"\u003eattributions\u003c/a\u003e", "detectRetina": false, "maxNativeZoom": 18, "maxZoom": 18, "minZoom": 0, "noWrap": false, "opacity": 1, "subdomains": "abc", "tms": false}
+            ).addTo(map_1076b23f393131e462499fbf643921ea);
+        
+    
+            var marker_1b3ec7ac427ce40c3a12f169465d4009 = L.marker(
+                [-19.9289, -43.9348],
+                {}
+            ).addTo(map_1076b23f393131e462499fbf643921ea);
+        
+    
+            var icon_b23914e87e38e16468d5f5d8598b6ffd = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "play", "iconColor": "white", "markerColor": "green", "prefix": "fa"}
+            );
+            marker_1b3ec7ac427ce40c3a12f169465d4009.setIcon(icon_b23914e87e38e16468d5f5d8598b6ffd);
+        
+    
+        var popup_d4db311d55e7f38938caf4ace4d433df = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_d3489b813a0d9eec8a4630e9df35b014 = $(`<div id="html_d3489b813a0d9eec8a4630e9df35b014" style="width: 100.0%; height: 100.0%;">     <div style="font-family: Arial; width: 250px;">         <h4 style="margin: 0; color: #333;">[SAÍDA] Centro - Saída</h4>         <hr style="margin: 5px 0;">         <p style="margin: 5px 0;"><b>Status:</b> INICIO</p>         <p style="margin: 5px 0;"><b>Coordenadas:</b> -19.9289, -43.9348</p>     </div>     </div>`)[0];
+                popup_d4db311d55e7f38938caf4ace4d433df.setContent(html_d3489b813a0d9eec8a4630e9df35b014);
+            
+        
+
+        marker_1b3ec7ac427ce40c3a12f169465d4009.bindPopup(popup_d4db311d55e7f38938caf4ace4d433df)
+        ;
+
+        
+    
+    
+            marker_1b3ec7ac427ce40c3a12f169465d4009.bindTooltip(
+                `<div>
+                     Centro - Saída
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_1505edfdbd85db5e2685dfbe94223c49 = L.marker(
+                [-19.9265, -43.932],
+                {}
+            ).addTo(map_1076b23f393131e462499fbf643921ea);
+        
+    
+            var icon_db40687d0ede34264337cca31cc7bdd4 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "check", "iconColor": "white", "markerColor": "blue", "prefix": "fa"}
+            );
+            marker_1505edfdbd85db5e2685dfbe94223c49.setIcon(icon_db40687d0ede34264337cca31cc7bdd4);
+        
+    
+        var popup_ba7ae9a6ea917c889a2cba1bd43a31e7 = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_05a2500fc5d90deb0c7a7ae9049e0a96 = $(`<div id="html_05a2500fc5d90deb0c7a7ae9049e0a96" style="width: 100.0%; height: 100.0%;">     <div style="font-family: Arial; width: 250px;">         <h4 style="margin: 0; color: #333;">[OTIMIZADO] Semáforo 1 - Av. Afonso Pena</h4>         <hr style="margin: 5px 0;">         <p style="margin: 5px 0;"><b>Status:</b> OTIMIZADO</p>         <p style="margin: 5px 0;"><b>Coordenadas:</b> -19.9265, -43.9320</p>     </div>     </div>`)[0];
+                popup_ba7ae9a6ea917c889a2cba1bd43a31e7.setContent(html_05a2500fc5d90deb0c7a7ae9049e0a96);
+            
+        
+
+        marker_1505edfdbd85db5e2685dfbe94223c49.bindPopup(popup_ba7ae9a6ea917c889a2cba1bd43a31e7)
+        ;
+
+        
+    
+    
+            marker_1505edfdbd85db5e2685dfbe94223c49.bindTooltip(
+                `<div>
+                     Semáforo 1 - Av. Afonso Pena
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_c5af96c3318ef495226a4468ca30fde9 = L.marker(
+                [-19.921, -43.928],
+                {}
+            ).addTo(map_1076b23f393131e462499fbf643921ea);
+        
+    
+            var icon_206eed70c47d165bf66470fa9512f721 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "check", "iconColor": "white", "markerColor": "blue", "prefix": "fa"}
+            );
+            marker_c5af96c3318ef495226a4468ca30fde9.setIcon(icon_206eed70c47d165bf66470fa9512f721);
+        
+    
+        var popup_dbcabc8390772ad023a62577f9029638 = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_b3890c1c2d375e1160511539b02d8a8c = $(`<div id="html_b3890c1c2d375e1160511539b02d8a8c" style="width: 100.0%; height: 100.0%;">     <div style="font-family: Arial; width: 250px;">         <h4 style="margin: 0; color: #333;">[OTIMIZADO] Semáforo 2 - Av. Getúlio Vargas</h4>         <hr style="margin: 5px 0;">         <p style="margin: 5px 0;"><b>Status:</b> OTIMIZADO</p>         <p style="margin: 5px 0;"><b>Coordenadas:</b> -19.9210, -43.9280</p>     </div>     </div>`)[0];
+                popup_dbcabc8390772ad023a62577f9029638.setContent(html_b3890c1c2d375e1160511539b02d8a8c);
+            
+        
+
+        marker_c5af96c3318ef495226a4468ca30fde9.bindPopup(popup_dbcabc8390772ad023a62577f9029638)
+        ;
+
+        
+    
+    
+            marker_c5af96c3318ef495226a4468ca30fde9.bindTooltip(
+                `<div>
+                     Semáforo 2 - Av. Getúlio Vargas
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_b5b9ee7ee530a0b34450d335673f4f11 = L.marker(
+                [-19.9175, -43.925],
+                {}
+            ).addTo(map_1076b23f393131e462499fbf643921ea);
+        
+    
+            var icon_7d0b196ba3140121fb64069417768a36 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "check", "iconColor": "white", "markerColor": "blue", "prefix": "fa"}
+            );
+            marker_b5b9ee7ee530a0b34450d335673f4f11.setIcon(icon_7d0b196ba3140121fb64069417768a36);
+        
+    
+        var popup_200f14e70bb111cd249308c1171d553f = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_773a006996c865e089a969812a19b88e = $(`<div id="html_773a006996c865e089a969812a19b88e" style="width: 100.0%; height: 100.0%;">     <div style="font-family: Arial; width: 250px;">         <h4 style="margin: 0; color: #333;">[OTIMIZADO] Semáforo 3 - Rua Bahia</h4>         <hr style="margin: 5px 0;">         <p style="margin: 5px 0;"><b>Status:</b> OTIMIZADO</p>         <p style="margin: 5px 0;"><b>Coordenadas:</b> -19.9175, -43.9250</p>     </div>     </div>`)[0];
+                popup_200f14e70bb111cd249308c1171d553f.setContent(html_773a006996c865e089a969812a19b88e);
+            
+        
+
+        marker_b5b9ee7ee530a0b34450d335673f4f11.bindPopup(popup_200f14e70bb111cd249308c1171d553f)
+        ;
+
+        
+    
+    
+            marker_b5b9ee7ee530a0b34450d335673f4f11.bindTooltip(
+                `<div>
+                     Semáforo 3 - Rua Bahia
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_54ffd72d529727cda93667b4e42d7bc1 = L.marker(
+                [-19.9145, -43.9215],
+                {}
+            ).addTo(map_1076b23f393131e462499fbf643921ea);
+        
+    
+            var icon_1a9827bdc921e238323050e1240dd439 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "arrow-right", "iconColor": "white", "markerColor": "orange", "prefix": "fa"}
+            );
+            marker_54ffd72d529727cda93667b4e42d7bc1.setIcon(icon_1a9827bdc921e238323050e1240dd439);
+        
+    
+        var popup_4ee3e71296c27bfb4908f6138cbd11df = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_eec4210e65b6b04466a1b6ad93a32d45 = $(`<div id="html_eec4210e65b6b04466a1b6ad93a32d45" style="width: 100.0%; height: 100.0%;">     <div style="font-family: Arial; width: 250px;">         <h4 style="margin: 0; color: #333;">[PASSANDO] Savassi - Rua Inconfidentes</h4>         <hr style="margin: 5px 0;">         <p style="margin: 5px 0;"><b>Status:</b> PASSANDO</p>         <p style="margin: 5px 0;"><b>Coordenadas:</b> -19.9145, -43.9215</p>     </div>     </div>`)[0];
+                popup_4ee3e71296c27bfb4908f6138cbd11df.setContent(html_eec4210e65b6b04466a1b6ad93a32d45);
+            
+        
+
+        marker_54ffd72d529727cda93667b4e42d7bc1.bindPopup(popup_4ee3e71296c27bfb4908f6138cbd11df)
+        ;
+
+        
+    
+    
+            marker_54ffd72d529727cda93667b4e42d7bc1.bindTooltip(
+                `<div>
+                     Savassi - Rua Inconfidentes
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_b006f51b616607699065d099dec51d3a = L.marker(
+                [-19.912, -43.919],
+                {}
+            ).addTo(map_1076b23f393131e462499fbf643921ea);
+        
+    
+            var icon_5e98df6cc7803e65f497a7fcfcbd115f = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "check", "iconColor": "white", "markerColor": "blue", "prefix": "fa"}
+            );
+            marker_b006f51b616607699065d099dec51d3a.setIcon(icon_5e98df6cc7803e65f497a7fcfcbd115f);
+        
+    
+        var popup_fbaadb113dec3ea4cc31313f38854f00 = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_d8611b8b7ccc47449954fb3e04576e9d = $(`<div id="html_d8611b8b7ccc47449954fb3e04576e9d" style="width: 100.0%; height: 100.0%;">     <div style="font-family: Arial; width: 250px;">         <h4 style="margin: 0; color: #333;">[OTIMIZADO] Semáforo 4 - Av. Brasil</h4>         <hr style="margin: 5px 0;">         <p style="margin: 5px 0;"><b>Status:</b> OTIMIZADO</p>         <p style="margin: 5px 0;"><b>Coordenadas:</b> -19.9120, -43.9190</p>     </div>     </div>`)[0];
+                popup_fbaadb113dec3ea4cc31313f38854f00.setContent(html_d8611b8b7ccc47449954fb3e04576e9d);
+            
+        
+
+        marker_b006f51b616607699065d099dec51d3a.bindPopup(popup_fbaadb113dec3ea4cc31313f38854f00)
+        ;
+
+        
+    
+    
+            marker_b006f51b616607699065d099dec51d3a.bindTooltip(
+                `<div>
+                     Semáforo 4 - Av. Brasil
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_aefd7ee6fe62c0521330bba39dad5bc0 = L.marker(
+                [-19.9085, -43.916],
+                {}
+            ).addTo(map_1076b23f393131e462499fbf643921ea);
+        
+    
+            var icon_594dd5e76346d5112e5fa43c46516094 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "arrow-right", "iconColor": "white", "markerColor": "orange", "prefix": "fa"}
+            );
+            marker_aefd7ee6fe62c0521330bba39dad5bc0.setIcon(icon_594dd5e76346d5112e5fa43c46516094);
+        
+    
+        var popup_bd4204476cb2506ff60f0c3ad0377240 = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_9c417573d9bf8cdddd314933c879efdf = $(`<div id="html_9c417573d9bf8cdddd314933c879efdf" style="width: 100.0%; height: 100.0%;">     <div style="font-family: Arial; width: 250px;">         <h4 style="margin: 0; color: #333;">[PASSANDO] Lourdes - Via Brasil</h4>         <hr style="margin: 5px 0;">         <p style="margin: 5px 0;"><b>Status:</b> PASSANDO</p>         <p style="margin: 5px 0;"><b>Coordenadas:</b> -19.9085, -43.9160</p>     </div>     </div>`)[0];
+                popup_bd4204476cb2506ff60f0c3ad0377240.setContent(html_9c417573d9bf8cdddd314933c879efdf);
+            
+        
+
+        marker_aefd7ee6fe62c0521330bba39dad5bc0.bindPopup(popup_bd4204476cb2506ff60f0c3ad0377240)
+        ;
+
+        
+    
+    
+            marker_aefd7ee6fe62c0521330bba39dad5bc0.bindTooltip(
+                `<div>
+                     Lourdes - Via Brasil
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_e0d8c37c72bb364b355b0abf06fffacf = L.marker(
+                [-19.905, -43.913],
+                {}
+            ).addTo(map_1076b23f393131e462499fbf643921ea);
+        
+    
+            var icon_161ae299933bebeb5290475b9a9c0ed3 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "check", "iconColor": "white", "markerColor": "blue", "prefix": "fa"}
+            );
+            marker_e0d8c37c72bb364b355b0abf06fffacf.setIcon(icon_161ae299933bebeb5290475b9a9c0ed3);
+        
+    
+        var popup_aeb75fcfd0050f5003d2c1208a10a38b = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_eafb6272697044ef0e65389576ab213b = $(`<div id="html_eafb6272697044ef0e65389576ab213b" style="width: 100.0%; height: 100.0%;">     <div style="font-family: Arial; width: 250px;">         <h4 style="margin: 0; color: #333;">[OTIMIZADO] Semáforo 5 - Av. Cristóvão Colombo</h4>         <hr style="margin: 5px 0;">         <p style="margin: 5px 0;"><b>Status:</b> OTIMIZADO</p>         <p style="margin: 5px 0;"><b>Coordenadas:</b> -19.9050, -43.9130</p>     </div>     </div>`)[0];
+                popup_aeb75fcfd0050f5003d2c1208a10a38b.setContent(html_eafb6272697044ef0e65389576ab213b);
+            
+        
+
+        marker_e0d8c37c72bb364b355b0abf06fffacf.bindPopup(popup_aeb75fcfd0050f5003d2c1208a10a38b)
+        ;
+
+        
+    
+    
+            marker_e0d8c37c72bb364b355b0abf06fffacf.bindTooltip(
+                `<div>
+                     Semáforo 5 - Av. Cristóvão Colombo
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_a5d89dc8f13414052a16d95b64f2da6c = L.marker(
+                [-19.902, -43.91],
+                {}
+            ).addTo(map_1076b23f393131e462499fbf643921ea);
+        
+    
+            var icon_8883616e492654667259004d766054f3 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "stop", "iconColor": "white", "markerColor": "red", "prefix": "fa"}
+            );
+            marker_a5d89dc8f13414052a16d95b64f2da6c.setIcon(icon_8883616e492654667259004d766054f3);
+        
+    
+        var popup_f3c4f259d1f79947791102b0941f7078 = L.popup({"maxWidth": 300});
+
+        
+            
+                var html_dcb8647d619100fc1ed68b77a4f15cc6 = $(`<div id="html_dcb8647d619100fc1ed68b77a4f15cc6" style="width: 100.0%; height: 100.0%;">     <div style="font-family: Arial; width: 250px;">         <h4 style="margin: 0; color: #333;">[DESTINO] Funcionários - Destino</h4>         <hr style="margin: 5px 0;">         <p style="margin: 5px 0;"><b>Status:</b> FIM</p>         <p style="margin: 5px 0;"><b>Coordenadas:</b> -19.9020, -43.9100</p>     </div>     </div>`)[0];
+                popup_f3c4f259d1f79947791102b0941f7078.setContent(html_dcb8647d619100fc1ed68b77a4f15cc6);
+            
+        
+
+        marker_a5d89dc8f13414052a16d95b64f2da6c.bindPopup(popup_f3c4f259d1f79947791102b0941f7078)
+        ;
+
+        
+    
+    
+            marker_a5d89dc8f13414052a16d95b64f2da6c.bindTooltip(
+                `<div>
+                     Funcionários - Destino
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var poly_line_7f1b25067d811a7a7f01d2c7aeb6794a = L.polyline(
+                [[-19.9289, -43.9348], [-19.9265, -43.932], [-19.921, -43.928], [-19.9175, -43.925], [-19.9145, -43.9215], [-19.912, -43.919], [-19.9085, -43.916], [-19.905, -43.913], [-19.902, -43.91]],
+                {"bubblingMouseEvents": true, "color": "#FF6B6B", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#FF6B6B", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.8, "smoothFactor": 1.0, "stroke": true, "weight": 4}
+            ).addTo(map_1076b23f393131e462499fbf643921ea);
+        
+    
+        var popup_a2243722a98f69b20cdf738ce20ed5b4 = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_fbfb8cb72e019e0d7a83b59e13c8e11d = $(`<div id="html_fbfb8cb72e019e0d7a83b59e13c8e11d" style="width: 100.0%; height: 100.0%;">Rota do Ônibus</div>`)[0];
+                popup_a2243722a98f69b20cdf738ce20ed5b4.setContent(html_fbfb8cb72e019e0d7a83b59e13c8e11d);
+            
+        
+
+        poly_line_7f1b25067d811a7a7f01d2c7aeb6794a.bindPopup(popup_a2243722a98f69b20cdf738ce20ed5b4)
+        ;
+
+        
+    
+</script>
+</html>

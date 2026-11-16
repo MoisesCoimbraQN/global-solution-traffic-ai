@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa TomTom - Rota Otimizada de Semáforos</title>
+    <link rel="stylesheet" href="https://cdn.tomtom.com/cdn-libs/tomtom-maps-api/v6/cdn/maps/tomtom-maps.css"/>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+        }
+        
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            height: 100vh;
+        }
+        
+        .legenda {
+            position: fixed;
+            bottom: 50px;
+            right: 50px;
+            width: 280px;
+            background-color: white;
+            border: 3px solid #333;
+            z-index: 9999;
+            font-size: 12px;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.3);
+        }
+        
+        .legenda h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .legenda hr {
+            margin: 8px 0;
+            border: none;
+            border-top: 1px solid #ccc;
+        }
+        
+        .legenda-item {
+            margin: 8px 0;
+            padding: 5px 0;
+        }
+        
+        .legenda-item .cor {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 3px;
+            color: white;
+            font-weight: bold;
+            margin-right: 8px;
+            font-size: 11px;
+        }
+        
+        .titulo {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        
+        .titulo h1 {
+            margin: 0;
+            font-size: 18px;
+            color: #333;
+        }
+        
+        .titulo p {
+            margin: 5px 0 0 0;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #2ecc71;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    
+    <div class="titulo">
+        <h1>🚌 Rota Otimizada - TomTom</h1>
+        <p>Semáforos inteligentes em Belo Horizonte</p>
+    </div>
+    
+    <div class="status">
+        ✓ USANDO TomTom API
+    </div>
+    
+    <div class="legenda">
+        <h3>Legenda - Rota Otimizada</h3>
+        <hr>
+        
+        <div class="legenda-item">
+            <span class="cor" style="background: #2ecc71;">SAIDA</span>
+            <span>Verde = Ponto de Saída (Centro)</span>
+        </div>
+        
+        <div class="legenda-item">
+            <span class="cor" style="background: #3498db;">OTIM</span>
+            <span>Azul = Semáforo Otimizado</span>
+        </div>
+        
+        <div class="legenda-item">
+            <span class="cor" style="background: #f39c12;">PASS</span>
+            <span>Laranja = Ponto de Passagem</span>
+        </div>
+        
+        <div class="legenda-item">
+            <span class="cor" style="background: #e74c3c;">DEST</span>
+            <span>Vermelho = Destino (Funcionários)</span>
+        </div>
+        
+        <hr>
+        
+        <p style="margin: 8px 0; font-size: 11px; color: #666;">
+            <b>Impacto Total:</b><br>
+            ✓ +180 segundos ganhos<br>
+            ✓ 900m fila reduzida<br>
+            ✓ ~2.1 min economizados
+        </p>
+    </div>
+
+    <script src="https://cdn.tomtom.com/cdn-libs/tomtom-maps-api/v6/cdn/maps/tomtom-maps.js"></script>
+    <script>
+        // Chave da API TomTom
+        const API_KEY = 'hXan3baE73yeieqt6nD012BISAW65QoJ';
+        
+        // Coordenadas de Belo Horizonte
+        const BH_CENTER = { lat: -19.9167, lng: -43.9345 };
+        
+        // Pontos da rota
+        const pontos = [
+            { nome: 'Centro - Saída', lat: -19.9289, lng: -43.9348, status: 'INICIO', cor: '#2ecc71' },
+            { nome: 'Semáforo 1 - Av. Afonso Pena', lat: -19.9265, lng: -43.9320, status: 'OTIMIZADO', cor: '#3498db' },
+            { nome: 'Semáforo 2 - Av. Getúlio Vargas', lat: -19.9210, lng: -43.9280, status: 'OTIMIZADO', cor: '#3498db' },
+            { nome: 'Semáforo 3 - Rua Bahia', lat: -19.9175, lng: -43.9250, status: 'OTIMIZADO', cor: '#3498db' },
+            { nome: 'Savassi - Rua Inconfidentes', lat: -19.9145, lng: -43.9215, status: 'PASSANDO', cor: '#f39c12' },
+            { nome: 'Semáforo 4 - Av. Brasil', lat: -19.9120, lng: -43.9190, status: 'OTIMIZADO', cor: '#3498db' },
+            { nome: 'Lourdes - Via Brasil', lat: -19.9085, lng: -43.9160, status: 'PASSANDO', cor: '#f39c12' },
+            { nome: 'Semáforo 5 - Av. Cristóvão Colombo', lat: -19.9050, lng: -43.9130, status: 'OTIMIZADO', cor: '#3498db' },
+            { nome: 'Funcionários - Destino', lat: -19.9020, lng: -43.9100, status: 'FIM', cor: '#e74c3c' }
+        ];
+        
+        // Criar mapa TomTom com opções corretas
+        const map = tt.map({
+            key: API_KEY,
+            container: 'map',
+            center: tt.LngLat(BH_CENTER.lng, BH_CENTER.lat),
+            zoom: 13
+        });
+        
+        // Adicionar controles de navegação
+        map.addControl(new tt.FullscreenControl());
+        map.addControl(new tt.NavigationControl());
+        
+        // Adicionar marcadores
+        pontos.forEach((ponto, index) => {
+            const popup = new tt.Popup({ offset: [0, -15] })
+                .setHTML(`
+                    <div style="padding: 10px; font-family: Arial; font-size: 12px;">
+                        <b>${ponto.nome}</b><br>
+                        Status: ${ponto.status}<br>
+                        Lat: ${ponto.lat.toFixed(4)}<br>
+                        Lng: ${ponto.lng.toFixed(4)}
+                    </div>
+                `);
+            
+            new tt.Marker({ color: ponto.cor })
+                .setLngLat([ponto.lng, ponto.lat])
+                .setPopup(popup)
+                .addTo(map);
+        });
+        
+        // Desenhar linha conectando os pontos da rota
+        const coordinates = pontos.map(p => [p.lng, p.lat]);
+        
+        map.on('load', function() {
+            map.addSource('route', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'LineString',
+                        'coordinates': coordinates
+                    }
+                }
+            });
+            
+            map.addLayer({
+                'id': 'route',
+                'type': 'line',
+                'source': 'route',
+                'layout': {
+                    'line-join': 'round',
+                    'line-cap': 'round'
+                },
+                'paint': {
+                    'line-color': '#6366f1',
+                    'line-width': 3,
+                    'line-opacity': 0.7
+                }
+            });
+        });
+        
+        // Desenhar rota
+        const coordenadas = pontos.map(p => [p.lng, p.lat]);
+        
+        map.addSource('rota', {
+            type: 'geojson',
+            data: {
+                type: 'Feature',
+                geometry: {
+                    type: 'LineString',
+                    coordinates: coordenadas
+                }
+            }
+        });
+        
+        map.addLayer({
+            id: 'rota-layer',
+            type: 'line',
+            source: 'rota',
+            paint: {
+                'line-color': '#FF0000',
+                'line-width': 5,
+                'line-opacity': 0.8
+            }
+        });
+        
+        // Adicionar controles
+        map.addControl(new tt.ZoomControl());
+        map.addControl(new tt.FullscreenControl());
+        
+        console.log('Mapa TomTom carregado com sucesso!');
+        console.log('API Key: hXan3baE73yeieqt6nD012BISAW65QoJ');
+        console.log('Centro: Belo Horizonte, MG');
+        console.log('Zoom: 13');
+    </script>
+</body>
+</html>

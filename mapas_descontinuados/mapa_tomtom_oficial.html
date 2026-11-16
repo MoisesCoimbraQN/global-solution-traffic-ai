@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚦 Mapa - Otimização de Semáforos em BH</title>
+    
+    <!-- Leaflet CSS e JS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            background: #f0f0f0;
+        }
+        
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            background: #e0e0e0;
+        }
+        
+        .titulo {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            min-width: 300px;
+        }
+        
+        .titulo h1 {
+            margin: 0;
+            font-size: 20px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .titulo p {
+            margin: 8px 0 0 0;
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .status-badge {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            padding: 12px 18px;
+            border-radius: 8px;
+            font-weight: bold;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+        }
+        
+        .legenda {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: white;
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+            width: 280px;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            max-height: 70vh;
+            overflow-y: auto;
+            font-size: 12px;
+        }
+        
+        .legenda h3 {
+            margin: 0 0 12px 0;
+            font-size: 15px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .legenda-item {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .legenda-cor {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            border: 2px solid rgba(0,0,0,0.2);
+        }
+        
+        .stats {
+            background: #f8f9fa;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 11px;
+            color: #666;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+        
+        .stats p {
+            margin: 4px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    
+    <div class="titulo">
+        <h1>🚦 Mapa - Otimização de Semáforos</h1>
+        <p>Belo Horizonte - Rota Inteligente em Tempo Real</p>
+    </div>
+    
+    <div class="status-badge" id="status">
+        ✓ MAPA ATIVO
+    </div>
+    
+    <div style="position: fixed; top: 130px; left: 20px; background: white; padding: 10px; border-radius: 8px; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.2); display: flex; gap: 5px; flex-wrap: wrap; max-width: 300px;">
+        <button onclick="trocarMapa('cartodb')" style="padding: 6px 10px; border: 1px solid #3498db; background: white; color: #3498db; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600;">CartoDB</button>
+        <button onclick="trocarMapa('OpenStreetMap')" style="padding: 6px 10px; border: 1px solid #27ae60; background: white; color: #27ae60; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600;">OSM</button>
+        <button onclick="trocarMapa('Satellite')" style="padding: 6px 10px; border: 1px solid #e74c3c; background: white; color: #e74c3c; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600;">Satélite</button>
+    </div>
+    
+    <div class="legenda">
+        <h3>Legenda da Rota</h3>
+        
+        <div class="legenda-item">
+            <div class="legenda-cor" style="background: #2ecc71;"></div>
+            <span><strong>🟢 INÍCIO</strong> - Centro</span>
+        </div>
+        
+        <div class="legenda-item">
+            <div class="legenda-cor" style="background: #3498db;"></div>
+            <span><strong>🔵 SEMÁFORO</strong> - Otimizado</span>
+        </div>
+        
+        <div class="legenda-item">
+            <div class="legenda-cor" style="background: #f39c12;"></div>
+            <span><strong>🟠 PASSAGEM</strong> - Intermediária</span>
+        </div>
+        
+        <div class="legenda-item">
+            <div class="legenda-cor" style="background: #e74c3c;"></div>
+            <span><strong>🔴 DESTINO</strong> - Funcionários</span>
+        </div>
+        
+        <div class="legenda-item">
+            <div class="legenda-cor" style="background: #6366f1;"></div>
+            <span><strong>─── Rota</strong> - Caminho otimizado</span>
+        </div>
+        
+        <div class="stats">
+            <p><strong>Impacto da Otimização:</strong></p>
+            <p>✓ +180 segundos ganhos</p>
+            <p>✓ 900m fila reduzida</p>
+            <p>✓ ~2.1 min economizados</p>
+        </div>
+    </div>
+
+    <script>
+        let mapaAtual = 'cartodb';
+        let layerMapa = null;
+        
+        // Diferentes provedores de mapa
+        const mapas = {
+            'cartodb': L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap, &copy; CartoDB',
+                maxZoom: 19,
+                crossOrigin: true
+            }),
+            'OpenStreetMap': L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors',
+                maxZoom: 19
+            }),
+            'Satellite': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles &copy; Esri',
+                maxZoom: 18
+            })
+        };
+        
+        // Inicializar mapa
+        const map = L.map('map').setView([-19.9167, -43.9345], 13);
+        
+        // Adicionar camada inicial
+        layerMapa = mapas['cartodb'].addTo(map);
+        
+        // Função para trocar mapa
+        window.trocarMapa = function(tipo) {
+            if (layerMapa) {
+                map.removeLayer(layerMapa);
+            }
+            layerMapa = mapas[tipo].addTo(map);
+            mapaAtual = tipo;
+            
+            const nomes = {
+                'cartodb': 'CartoDB',
+                'OpenStreetMap': 'OpenStreetMap',
+                'Satellite': 'Satélite (Esri)'
+            };
+            
+            console.log('✓ Mapa alterado para: ' + nomes[tipo]);
+        }
+        
+        // Ícones personalizados
+        function criarIcono(tipo) {
+            const cores = {
+                'INICIO': '#2ecc71',
+                'OTIMIZADO': '#3498db',
+                'PASSAGEM': '#f39c12',
+                'FIM': '#e74c3c'
+            };
+            
+            return L.divIcon({
+                className: 'custom-icon',
+                html: '<div style="width: 30px; height: 30px; background: ' + cores[tipo] + '; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);"></div>',
+                iconSize: [30, 30],
+                iconAnchor: [15, 15],
+                popupAnchor: [0, -20]
+            });
+        }
+        
+        // Pontos da rota
+        const pontos = [
+            { nome: 'Centro - Saída', lat: -19.9289, lng: -43.9348, tipo: 'INICIO' },
+            { nome: 'Semáforo 1 - Av. Afonso Pena', lat: -19.9265, lng: -43.9320, tipo: 'OTIMIZADO' },
+            { nome: 'Semáforo 2 - Av. Getúlio Vargas', lat: -19.9210, lng: -43.9280, tipo: 'OTIMIZADO' },
+            { nome: 'Semáforo 3 - Rua Bahia', lat: -19.9175, lng: -43.9250, tipo: 'OTIMIZADO' },
+            { nome: 'Savassi - Rua Inconfidentes', lat: -19.9145, lng: -43.9215, tipo: 'PASSAGEM' },
+            { nome: 'Semáforo 4 - Av. Brasil', lat: -19.9120, lng: -43.9190, tipo: 'OTIMIZADO' },
+            { nome: 'Lourdes - Via Brasil', lat: -19.9085, lng: -43.9160, tipo: 'PASSAGEM' },
+            { nome: 'Semáforo 5 - Av. Cristóvão Colombo', lat: -19.9050, lng: -43.9130, tipo: 'OTIMIZADO' },
+            { nome: 'Funcionários - Destino', lat: -19.9020, lng: -43.9100, tipo: 'FIM' }
+        ];
+        
+        // Adicionar marcadores
+        pontos.forEach((ponto) => {
+            const popup = '<div style="font-size: 12px;"><b>' + ponto.nome + '</b><br><small>Tipo: ' + ponto.tipo + '</small></div>';
+            
+            L.marker([ponto.lat, ponto.lng], {
+                icon: criarIcono(ponto.tipo)
+            })
+                .bindPopup(popup)
+                .addTo(map);
+        });
+        
+        // Desenhar rota
+        const coordenadas = pontos.map(p => [p.lat, p.lng]);
+        
+        L.polyline(coordenadas, {
+            color: '#6366f1',
+            weight: 3,
+            opacity: 0.7
+        }).addTo(map);
+        
+        // Adicionar controles
+        L.control.zoom({ position: 'topright' }).addTo(map);
+        
+        console.log('✓ Mapa carregado com sucesso!');
+        console.log('✓ ' + pontos.length + ' marcadores adicionados');
+    </script>
+</body>
+</html>

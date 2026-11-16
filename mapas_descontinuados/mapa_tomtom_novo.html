@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚦 Mapa TomTom - Otimização de Semáforos em BH</title>
+    
+    <!-- TomTom API CSS -->
+    <link rel="stylesheet" href="https://cdn.tomtom.com/cdn-libs/tomtom-maps-api/v6/cdn/maps/tomtom-maps.css"/>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            background: #f0f0f0;
+        }
+        
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        .titulo {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            min-width: 300px;
+        }
+        
+        .titulo h1 {
+            margin: 0;
+            font-size: 20px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .titulo p {
+            margin: 8px 0 0 0;
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .status-badge {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            padding: 12px 18px;
+            border-radius: 8px;
+            font-weight: bold;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .status-badge::before {
+            content: '✓';
+            font-size: 18px;
+        }
+        
+        .legenda {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: white;
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+            width: 280px;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        
+        .legenda h3 {
+            margin: 0 0 12px 0;
+            font-size: 15px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .legenda-divisor {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 10px 0;
+        }
+        
+        .legenda-item {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+        }
+        
+        .legenda-cor {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            flex-shrink: 0;
+            border: 1px solid rgba(0,0,0,0.2);
+        }
+        
+        .legenda-texto {
+            flex: 1;
+        }
+        
+        .stats {
+            background: #f8f9fa;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 11px;
+            color: #666;
+        }
+        
+        .stats p {
+            margin: 4px 0;
+        }
+        
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            z-index: 2000;
+            text-align: center;
+            display: none;
+        }
+        
+        .loading.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    
+    <div class="titulo">
+        <h1>🚦 Mapa TomTom - Otimização de Semáforos</h1>
+        <p>Belo Horizonte - Rota Inteligente em Tempo Real</p>
+    </div>
+    
+    <div class="status-badge">
+        USANDO TomTom API
+    </div>
+    
+    <div class="legenda">
+        <h3>Legenda da Rota</h3>
+        
+        <div class="legenda-item">
+            <div class="legenda-cor" style="background: #2ecc71;"></div>
+            <div class="legenda-texto">
+                <strong>🟢 INÍCIO</strong><br>
+                Ponto de Saída (Centro)
+            </div>
+        </div>
+        
+        <div class="legenda-item">
+            <div class="legenda-cor" style="background: #3498db;"></div>
+            <div class="legenda-texto">
+                <strong>🔵 SEMÁFORO OTIMIZADO</strong><br>
+                Ajustado pelo algoritmo
+            </div>
+        </div>
+        
+        <div class="legenda-item">
+            <div class="legenda-cor" style="background: #f39c12;"></div>
+            <div class="legenda-texto">
+                <strong>🟠 PASSAGEM</strong><br>
+                Ponto intermediário
+            </div>
+        </div>
+        
+        <div class="legenda-item">
+            <div class="legenda-cor" style="background: #e74c3c;"></div>
+            <div class="legenda-texto">
+                <strong>🔴 DESTINO</strong><br>
+                Funcionários
+            </div>
+        </div>
+        
+        <div class="legenda-item">
+            <div class="legenda-cor" style="background: #6366f1;"></div>
+            <div class="legenda-texto">
+                <strong>Rota</strong><br>
+                Caminho otimizado
+            </div>
+        </div>
+        
+        <hr class="legenda-divisor">
+        
+        <div class="stats">
+            <p><strong>Impacto da Otimização:</strong></p>
+            <p>✓ +180 segundos ganhos</p>
+            <p>✓ 900m fila reduzida</p>
+            <p>✓ ~2.1 min economizados</p>
+        </div>
+    </div>
+    
+    <div class="loading show" id="loading">
+        <div class="spinner"></div>
+        <p>Carregando Mapa TomTom...</p>
+        <p style="font-size: 12px; color: #999;">Conectando à API</p>
+    </div>
+
+    <!-- TomTom API JS -->
+    <script src="https://cdn.tomtom.com/cdn-libs/tomtom-maps-api/v6/cdn/maps/tomtom-maps.js"></script>
+    
+    <script>
+        // Configuração da API TomTom
+        const API_KEY = 'hXan3baE73yeieqt6nD012BISAW65QoJ';
+        const BH_COORDS = [-43.9345, -19.9167]; // [lng, lat] em TomTom
+        
+        // Pontos da rota otimizada
+        const pontos_rota = [
+            { 
+                nome: 'Centro - Saída', 
+                coords: [-43.9348, -19.9289],
+                tipo: 'INICIO',
+                cor: '#2ecc71'
+            },
+            { 
+                nome: 'Semáforo 1 - Av. Afonso Pena', 
+                coords: [-43.9320, -19.9265],
+                tipo: 'OTIMIZADO',
+                cor: '#3498db'
+            },
+            { 
+                nome: 'Semáforo 2 - Av. Getúlio Vargas', 
+                coords: [-43.9280, -19.9210],
+                tipo: 'OTIMIZADO',
+                cor: '#3498db'
+            },
+            { 
+                nome: 'Semáforo 3 - Rua Bahia', 
+                coords: [-43.9250, -19.9175],
+                tipo: 'OTIMIZADO',
+                cor: '#3498db'
+            },
+            { 
+                nome: 'Savassi - Rua Inconfidentes', 
+                coords: [-43.9215, -19.9145],
+                tipo: 'PASSAGEM',
+                cor: '#f39c12'
+            },
+            { 
+                nome: 'Semáforo 4 - Av. Brasil', 
+                coords: [-43.9190, -19.9120],
+                tipo: 'OTIMIZADO',
+                cor: '#3498db'
+            },
+            { 
+                nome: 'Lourdes - Via Brasil', 
+                coords: [-43.9160, -19.9085],
+                tipo: 'PASSAGEM',
+                cor: '#f39c12'
+            },
+            { 
+                nome: 'Semáforo 5 - Av. Cristóvão Colombo', 
+                coords: [-43.9130, -19.9050],
+                tipo: 'OTIMIZADO',
+                cor: '#3498db'
+            },
+            { 
+                nome: 'Funcionários - Destino', 
+                coords: [-43.9100, -19.9020],
+                tipo: 'FIM',
+                cor: '#e74c3c'
+            }
+        ];
+        
+        try {
+            // Inicializar mapa TomTom
+            const mapa = tt.map({
+                key: API_KEY,
+                container: 'map',
+                center: tt.LngLat(BH_COORDS[0], BH_COORDS[1]),
+                zoom: 13,
+                style: 'tomtom://vector/1/Basic Main'
+            });
+            
+            // Esperar o mapa carregar
+            mapa.on('load', function() {
+                console.log('✓ Mapa TomTom carregado com sucesso!');
+                
+                // Remover loading
+                const loading = document.getElementById('loading');
+                if (loading) {
+                    loading.classList.remove('show');
+                }
+                
+                // Adicionar fonte e camada da rota
+                const coordenadas = pontos_rota.map(p => p.coords);
+                
+                mapa.addSource('rota-line', {
+                    type: 'geojson',
+                    data: {
+                        type: 'Feature',
+                        geometry: {
+                            type: 'LineString',
+                            coordinates: coordenadas
+                        }
+                    }
+                });
+                
+                mapa.addLayer({
+                    id: 'rota-line-layer',
+                    type: 'line',
+                    source: 'rota-line',
+                    paint: {
+                        'line-color': '#6366f1',
+                        'line-width': 3,
+                        'line-opacity': 0.7
+                    }
+                });
+                
+                // Adicionar marcadores
+                pontos_rota.forEach((ponto, idx) => {
+                    const popup_html = `
+                        <div style="padding: 8px; font-family: Arial; font-size: 12px; min-width: 150px;">
+                            <b>${ponto.nome}</b><br>
+                            <small style="color: #666;">Tipo: ${ponto.tipo}</small><br>
+                            <small style="color: #999;">Lat: ${ponto.coords[1].toFixed(4)}</small><br>
+                            <small style="color: #999;">Lng: ${ponto.coords[0].toFixed(4)}</small>
+                        </div>
+                    `;
+                    
+                    const popup = new tt.Popup({ offset: [0, -10] })
+                        .setHTML(popup_html);
+                    
+                    new tt.Marker({
+                        color: ponto.cor,
+                        element: createMarkerElement(ponto.tipo)
+                    })
+                        .setLngLat(ponto.coords)
+                        .setPopup(popup)
+                        .addTo(mapa);
+                });
+                
+                // Adicionar controles
+                mapa.addControl(new tt.FullscreenControl());
+                mapa.addControl(new tt.NavigationControl());
+                
+                console.log(`✓ ${pontos_rota.length} marcadores adicionados`);
+                console.log('✓ Rota desenhada com sucesso');
+            });
+            
+            // Função para criar elementos personalizados dos marcadores
+            function createMarkerElement(tipo) {
+                const el = document.createElement('div');
+                el.className = 'tt-marker';
+                el.style.width = '30px';
+                el.style.height = '30px';
+                el.style.borderRadius = '50%';
+                el.style.display = 'flex';
+                el.style.alignItems = 'center';
+                el.style.justifyContent = 'center';
+                el.style.fontSize = '16px';
+                el.style.fontWeight = 'bold';
+                el.style.cursor = 'pointer';
+                el.style.border = '2px solid white';
+                el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
+                
+                switch(tipo) {
+                    case 'INICIO':
+                        el.textContent = '🟢';
+                        break;
+                    case 'OTIMIZADO':
+                        el.textContent = '🔵';
+                        break;
+                    case 'PASSAGEM':
+                        el.textContent = '🟠';
+                        break;
+                    case 'FIM':
+                        el.textContent = '🔴';
+                        break;
+                    default:
+                        el.textContent = '📍';
+                }
+                
+                return el;
+            }
+            
+        } catch (error) {
+            console.error('✗ Erro ao carregar mapa:', error);
+            document.getElementById('loading').innerHTML = `
+                <p style="color: #e74c3c; font-weight: bold;">⚠️ Erro ao carregar mapa</p>
+                <p style="font-size: 12px; color: #666;">${error.message}</p>
+                <p style="font-size: 11px; color: #999;">Verifique sua conexão com a internet</p>
+            `;
+        }
+    </script>
+</body>
+</html>

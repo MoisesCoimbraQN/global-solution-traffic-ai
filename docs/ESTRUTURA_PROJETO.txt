@@ -1,0 +1,162 @@
+📦 GlobalSolution
+│
+├── 🔐 .env                           # Variáveis de ambiente (SEM COMMIT)
+├── .gitignore                        # Configuração Git
+├── 📄 README.md                      # Documentação principal
+├── 📋 ESTRUTURA_PROJETO.txt         # Este arquivo
+│
+├── 🗄️ DATABASE
+│   ├── criar_warehouse.sql          # Script SQL para criar todas as tabelas
+│   └── queries_exemplo.sql          # Consultas SQL úteis
+│
+├── 🐍 BACKEND
+│   ├── coleta_transito.py          # Script básico de coleta TomTom
+│   ├── coletor_transito_db.py      # Coletor com persistência no banco
+│   ├── setup_warehouse.py           # Inicialização do Data Warehouse
+│   └── requirements.txt             # Dependências Python
+│
+├── 📊 ANÁLISE
+│   ├── dashboards/                  # (FUTURO) Visualizações Tableau/Power BI
+│   └── relatorios/                  # (FUTURO) Relatórios automáticos
+│
+├── 🔧 ALGORITMOS
+│   ├── otimizacao_semaforos/       # (FUTURO) Algoritmo adaptativo
+│   └── previsao_congestionamento/  # (FUTURO) ML para previsão
+│
+├── 🧪 TESTES
+│   ├── test_coleta.py              # Testes unitários
+│   └── test_banco.py               # Testes de banco de dados
+│
+└── 📚 DOCS
+    ├── arquitetura.md              # Documentação técnica
+    ├── api_tomtom.md               # Documentação da API
+    └── modelo_dados.md             # Detalhes do modelo Snowflake
+
+═════════════════════════════════════════════════════════════════
+
+🎯 FLUXO DE DADOS
+
+1. Coleta (TomTom API)
+   └─→ coletor_transito_db.py
+   
+2. Processamento
+   └─→ Cálculo de métricas (velocidade, score de congestionamento)
+   
+3. Armazenamento
+   └─→ PostgreSQL (AWS EC2)
+   
+4. Análise
+   └─→ SQL Queries / Views
+   
+5. Visualização
+   └─→ Dashboards em Tempo Real
+
+═════════════════════════════════════════════════════════════════
+
+📊 TABELAS DO DATA WAREHOUSE
+
+DIMENSÕES:
+  • dim_regiao           - Informações geográficas (bairro, zona, cidade)
+  • dim_via              - Dados das vias monitoradas
+  • dim_tempo            - Dimensão temporal (15 minutos)
+  • dim_cruzamento       - Localização dos semáforos
+
+FATOS:
+  • fato_transito_tempo_real    - Métricas de tráfego
+  • fato_ciclo_semaforo         - Histórico de ajustes
+
+AUXILIARES:
+  • horarios_pico        - Configuração de horários de pico
+
+VIEWS:
+  • vw_transito_resumido       - Resumo agregado de tráfego
+  • vw_eficacia_semaforos      - Análise de eficácia dos semáforos
+
+═════════════════════════════════════════════════════════════════
+
+🚀 COMO COMEÇAR
+
+1. Ativar ambiente virtual:
+   .\.venv\Scripts\Activate.ps1
+
+2. Configurar .env com credenciais:
+   - DB_HOST, DB_USER, DB_PASSWORD
+   - TOMTOM_API_KEY
+
+3. Criar banco de dados:
+   python setup_warehouse.py
+
+4. Iniciar coleta de dados:
+   python coletor_transito_db.py
+
+═════════════════════════════════════════════════════════════════
+
+📈 MÉTRICAS MONITORADAS
+
+✓ Velocidade atual (km/h)
+✓ Velocidade livre/esperada
+✓ Tempo de percurso
+✓ Fator de atraso
+✓ Score de congestionamento (0-100)
+✓ Densidade de veículos
+✓ Fluxo de veículos (veíc/hora)
+✓ Presença de incidentes
+✓ Eficácia de ajustes de semáforo
+
+═════════════════════════════════════════════════════════════════
+
+🔐 SEGURANÇA
+
+✓ Chaves de API em .env (nunca commit)
+✓ .gitignore protege dados sensíveis
+✓ Variáveis de ambiente carregadas via python-dotenv
+✓ Conexões PostgreSQL autenticadas
+✓ Sem credenciais hardcoded no código
+
+═════════════════════════════════════════════════════════════════
+
+📞 DEPENDÊNCIAS
+
+Python Packages:
+  • requests          - Requisições HTTP (TomTom API)
+  • psycopg2-binary   - Driver PostgreSQL
+  • python-dotenv     - Carregamento de variáveis de ambiente
+
+Banco de Dados:
+  • PostgreSQL 12+
+  
+Infraestrutura:
+  • AWS EC2 (us-east-2)
+
+APIs:
+  • TomTom Routing API
+
+═════════════════════════════════════════════════════════════════
+
+🎓 MODELO SNOWFLAKE
+
+O modelo Snowflake é ideal para Data Warehouses porque:
+
+✓ Normalização reduz redundância
+✓ Dimensões ramificadas permitem análises flexíveis
+✓ Fatos centralizados para métricas
+✓ Escalável para novos bairros/cidades
+✓ Otimizado para consultas OLAP
+
+Estrutura:
+                  [dim_regiao] 
+                       │
+                       ▼
+[dim_tempo] ───> [dim_via] <─── [dim_cruzamento]
+                       │
+                       ▼
+            [fato_transito_tempo_real]
+
+═════════════════════════════════════════════════════════════════
+
+📝 VERSÃO
+
+Global Solution - CitizenTech v1.0
+Última atualização: 2026-11-16
+
+═════════════════════════════════════════════════════════════════

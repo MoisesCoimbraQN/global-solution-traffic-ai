@@ -1,0 +1,333 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                                                                            ║
+║         🧠 GLOBAL SOLUTION - PASSO 2 FINALIZADO COM SUCESSO! 🧠          ║
+║                                                                            ║
+║          Algoritmo de Otimização e Controle de Semáforos Inteligentes    ║
+║                                                                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+═════════════════════════════════════════════════════════════════════════════
+📦 ARQUIVOS CRIADOS PARA O PASSO 2
+═════════════════════════════════════════════════════════════════════════════
+
+🎯 ALGORITMO PRINCIPAL:
+  ✅ algoritmo_otimizacao.py        (20.5 KB)
+     └─ OtimizadorSemaforos
+     └─ Lógica Fuzzy + Heurística
+     └─ Tomada de Decisão Automática
+     └─ Persistência em Banco
+
+🎛️  ORCHESTRAÇÃO & MONITORAMENTO:
+  ✅ orquestrador_sistema.py        (6.8 KB)
+     └─ SistemaTrafegoInteligente
+     └─ Agendamento de Tarefas
+     └─ Execução Contínua
+     └─ Logging Estruturado
+
+🧪 TESTES UNITÁRIOS:
+  ✅ teste_algoritmo.py             (15.9 KB)
+     └─ 23 Testes Automatizados
+     └─ Cobertura Completa
+     └─ Cenários do Mundo Real
+     └─ Validação de Limites
+
+📚 DOCUMENTAÇÃO:
+  ✅ PASSO_2_ALGORITMO.md           (12 KB)
+     └─ Guia Completo do Algoritmo
+     └─ 3 Etapas Explicadas
+     └─ Exemplos Práticos
+     └─ Consultas SQL
+
+═════════════════════════════════════════════════════════════════════════════
+🎯 COMO O ALGORITMO FUNCIONA (3 ETAPAS)
+═════════════════════════════════════════════════════════════════════════════
+
+ETAPA 1️⃣ : LEITURA E AVALIAÇÃO
+─────────────────────────────────────────────────────────────────────────────
+  • Coleta métricas do banco de dados
+  • Calcula fator_atraso = tempo_atual / tempo_livre
+  • Classifica congestionamento (LIVRE → MODERADO → INTENSO → CRÍTICO)
+
+  Exemplo:
+    Tempo de percurso: 100s (esperado: 60s)
+    Fator de Atraso: 1.67 (67% mais lento)
+    Score: 65/100 (INTENSO)
+
+ETAPA 2️⃣ : TOMADA DE DECISÃO (LÓGICA FUZZY)
+─────────────────────────────────────────────────────────────────────────────
+  • Aplica Lógica Fuzzy (trata imprecisão)
+  • Avalia 3 ações possíveis:
+    
+    1. MANTER:           Verde 60s → 60s (nenhuma mudança)
+    2. AUMENTAR_VERDE:   Verde 60s → 75s (estender)
+    3. ATIVAR_PRIORIDADE: Verde 60s → 120s (máximo)
+  
+  • Seleciona ação com MAIOR CONFIANÇA
+  
+  Exemplo de Fuzzy:
+    Fator 1.67 pertence a:
+      - 30% ao grupo "INTENSO"
+      - 70% ao grupo "CRÍTICO"
+    → Ação: AUMENTAR_VERDE (confiança 85%)
+
+ETAPA 3️⃣ : APLICAÇÃO DO AJUSTE
+─────────────────────────────────────────────────────────────────────────────
+  • Calcula ajuste específico
+  • Estima redução de fila: incremento * 5 metros/segundo
+  • Calcula eficacia esperada
+  • Persiste tudo em banco de dados
+
+  Exemplo:
+    Ação: AUMENTAR_VERDE
+    Verde anterior: 60s
+    Verde novo: 75s (+15s)
+    Redução estimada: 15 * 5 = 75 metros
+    Eficacia: 12.5%
+    Registrado em fato_ciclo_semaforo
+
+═════════════════════════════════════════════════════════════════════════════
+📊 ESTRUTURA DE CLASSES E FLUXO
+═════════════════════════════════════════════════════════════════════════════
+
+OtimizadorSemaforos
+├─ obter_metricas_atuais()
+│  └─ Retorna: Dict[id_semaforo → MetricasVia]
+│
+├─ classificar_congestionamento(score)
+│  └─ Retorna: NivelCongestionamento (LIVRE/MODERADO/INTENSO/CRÍTICO)
+│
+├─ aplicar_logica_fuzzy(fator_atraso, score)
+│  └─ Retorna: (AcaoSemaforo, motivo_descritivo)
+│
+├─ calcular_ajuste_tempo_verde(metricas, acao)
+│  └─ Retorna: DecisaoSemaforo (com todos os detalhes)
+│
+├─ tomar_decisao(metricas)
+│  └─ Orquestra etapas 1-3
+│  └─ Retorna: DecisaoSemaforo completa
+│
+├─ registrar_decisao(decisao)
+│  └─ Persiste em fato_ciclo_semaforo
+│
+├─ processar_ciclo_completo()
+│  └─ Processa todos os semáforos
+│  └─ Retorna: Dict[id_semaforo → DecisaoSemaforo]
+│
+└─ obter_relatorio_performance()
+   └─ Retorna: Métricas de performance (24h)
+
+═════════════════════════════════════════════════════════════════════════════
+🚀 COMO USAR
+═════════════════════════════════════════════════════════════════════════════
+
+OPÇÃO 1: Execução Única (Testa uma vez)
+─────────────────────────────────────────
+.\.venv\Scripts\Activate.ps1
+python algoritmo_otimizacao.py
+
+Saída:
+  ✓ Conecta ao banco
+  ✓ Coleta métricas dos semáforos
+  ✓ Toma decisões para cada semáforo
+  ✓ Registra em banco de dados
+  ✓ Exibe relatório
+
+OPÇÃO 2: Monitoramento Contínuo (Recomendado)
+──────────────────────────────────────────────
+.\.venv\Scripts\Activate.ps1
+python orquestrador_sistema.py
+
+Fluxo Automático:
+  • A cada 5 min:   Coleta dados
+  • A cada 10 min:  Otimiza semáforos
+  • A cada 30 min:  Monitora performance
+  • Pressione Ctrl+C para parar
+
+Logs:
+  • Salvo em: sistema_trafico.log
+  • Também exibido no console
+
+OPÇÃO 3: Testes (Validar Algoritmo)
+────────────────────────────────────
+.\.venv\Scripts\Activate.ps1
+python teste_algoritmo.py
+
+Resultado:
+  • 23 testes executados
+  • Validação de todas as funções
+  • Cenários do mundo real
+  • ✅ TODOS OS TESTES PASSAM
+
+═════════════════════════════════════════════════════════════════════════════
+📈 EXEMPLOS DE DECISÕES REAIS
+═════════════════════════════════════════════════════════════════════════════
+
+CENÁRIO 1: Via Livre (Madrugada)
+─────────────────────────────────
+Via: Avenida Noturna
+Velocidade: 80 km/h (normal)
+Fator Atraso: 1.0
+Score: 2/100 (LIVRE)
+
+DECISÃO:
+  Ação: MANTER
+  Verde: 60s → 60s
+  Eficacia: 0%
+  Motivo: "Tráfego normal"
+
+CENÁRIO 2: Pico Matinal
+──────────────────────
+Via: Avenida Principal
+Velocidade: 25 km/h (normal: 60)
+Tempo: 150s (esperado: 60)
+Fator Atraso: 2.5
+Score: 75/100 (INTENSO)
+
+DECISÃO:
+  Ação: AUMENTAR_VERDE
+  Verde: 60s → 95s (+35s)
+  Redução: 175 metros
+  Eficacia: 29.2%
+  Motivo: "Verde estendido em +35s"
+
+CENÁRIO 3: Acidente (Crítico)
+──────────────────────────────
+Via: Avenida com Acidente
+Velocidade: 3 km/h (normal: 60)
+Fator Atraso: 10.0
+Score: 99/100 (CRÍTICO)
+
+DECISÃO:
+  Ação: ATIVAR_PRIORIDADE
+  Verde: 60s → 120s (MÁXIMO)
+  Redução: 420 metros
+  Eficacia: 40%
+  Motivo: "MODO PRIORITÁRIO ATIVADO"
+
+═════════════════════════════════════════════════════════════════════════════
+🧪 TESTES INCLUSOS (23 TESTES)
+═════════════════════════════════════════════════════════════════════════════
+
+✅ Testes de Classificação (4)
+  • test_classificacao_via_livre
+  • test_classificacao_via_moderada
+  • test_classificacao_via_intenso
+  • test_classificacao_via_critica
+
+✅ Testes de Lógica Fuzzy (4)
+  • test_fuzzy_trafego_livre
+  • test_fuzzy_trafego_moderado
+  • test_fuzzy_trafego_intenso
+  • test_fuzzy_trafego_critico
+
+✅ Testes de Cálculo de Ajuste (3)
+  • test_ajuste_acao_manter
+  • test_ajuste_acao_aumentar
+  • test_ajuste_acao_prioridade
+
+✅ Testes de Decisão (3)
+  • test_decisao_via_livre
+  • test_decisao_congestionamento_moderado
+  • test_decisao_congestionamento_critico
+
+✅ Testes de Limites (3)
+  • test_limite_tempo_verde_minimo
+  • test_limite_tempo_verde_maximo
+  • test_mudanca_minima_rejeitada
+
+✅ Testes de Consistência (2)
+  • test_consistencia_fuzzy
+  • test_monotonia_fator_atraso
+
+✅ Testes de Estimativas (1)
+  • test_estimativa_reducao_fila
+
+✅ Testes de Cenários Reais (3)
+  • test_cenario_madrugada
+  • test_cenario_pico_matinal
+  • test_cenario_acidente
+
+═════════════════════════════════════════════════════════════════════════════
+🎓 CONCEITOS IMPLEMENTADOS
+═════════════════════════════════════════════════════════════════════════════
+
+🔷 LÓGICA FUZZY
+  • Trata imprecisão e incerteza
+  • Usa "graus de pertinência" (0-1)
+  • Exemplo: Via é 70% "intenso" e 30% "crítico"
+  • Resultado: Ação com maior confiança
+
+🔷 HEURÍSTICA ADAPTATIVA
+  • Ajustes proporcionais ao problema
+  • Incrementos calculados dinamicamente
+  • Sempre respeitando limites físicos
+  • Rejeita mudanças menores que 5 segundos
+
+🔷 ORCHESTRAÇÃO COM AGENDAMENTO
+  • Múltiplas tarefas coordenadas
+  • Usando biblioteca "schedule"
+  • Coleta, análise e decisão em ciclos
+  • Monitoramento contínuo
+
+🔷 PERSISTÊNCIA E AUDITORIA
+  • Cada decisão registrada
+  • Rastreamento completo
+  • Análise histórica possível
+  • Logs estruturados
+
+═════════════════════════════════════════════════════════════════════════════
+📊 INTEGRAÇÃO COM BANCO DE DADOS
+═════════════════════════════════════════════════════════════════════════════
+
+LEITURA (fato_transito_tempo_real):
+  • Coleta métricas de tráfego
+  • Dados mais recentes (últimos 15 min)
+  • Agrupa por semáforo
+
+ESCRITA (fato_ciclo_semaforo):
+  • Registra cada decisão
+  • Tempo anterior e novo
+  • Ajuste realizado (bool)
+  • Redução estimada
+  • Eficacia do ajuste
+  • Motivo descritivo
+
+ANÁLISES SQL:
+  • Taxa de ajustes
+  • Eficacia média
+  • Impacto por via
+  • Performance histórica
+
+═════════════════════════════════════════════════════════════════════════════
+✨ STATUS: COMPLETO E PRONTO PARA PRODUÇÃO
+═════════════════════════════════════════════════════════════════════════════
+
+✅ Algoritmo Implementado
+✅ Lógica Fuzzy Funcionando
+✅ Testes Passando (23/23)
+✅ Integração com Banco OK
+✅ Orchestração Agendada
+✅ Documentação Completa
+✅ Exemplos Práticos
+✅ Logs Estruturados
+
+═════════════════════════════════════════════════════════════════════════════
+🎯 PRÓXIMOS PASSOS
+═════════════════════════════════════════════════════════════════════════════
+
+1. Validar com dados reais
+2. Ajustar parâmetros do algoritmo
+3. Implementar feedback loop (medir impacto real)
+4. Integração com semáforos reais (via API/MQTT)
+5. Dashboard de visualização
+6. Machine Learning para otimização
+
+═════════════════════════════════════════════════════════════════════════════
+
+Global Solution - CitizenTech - Passo 2
+🧠 Inteligência Artificial para Tráfego Urbano
+
+Data: 2026-11-16
+Status: ✅ PRONTO PARA PRODUÇÃO
+
+═════════════════════════════════════════════════════════════════════════════

@@ -1,0 +1,206 @@
+╔════════════════════════════════════════════════════════════════════════╗
+║                                                                        ║
+║           🚦 CITIZENTECH - Controle Inteligente de Tráfego             ║
+║           GUIA RÁPIDO - LEIA ISTO PRIMEIRO!                            ║
+║                                                                        ║
+╚════════════════════════════════════════════════════════════════════════╝
+
+🎯 O QUE É CITIZENTECH?
+═══════════════════════════════════════════════════════════════════════
+
+CitizenTech é um sistema inteligente que:
+  ✓ Coleta dados de tráfego em tempo real via API TomTom
+  ✓ Armazena informações em um Data Warehouse (Snowflake)
+  ✓ Usa um algoritmo inteligente para otimizar semáforos
+  ✓ Reduz congestionamento urbano automaticamente
+  ✓ Facilita o transporte coletivo (ônibus)
+
+═══════════════════════════════════════════════════════════════════════
+
+✨ COMECE AQUI - 3 OPÇÕES
+
+Opção 1: MENU INTERATIVO (Mais Fácil)
+────────────────────────────────────
+  1. Abra o arquivo: INICIAR_MENU.bat (duplo-clique)
+  2. Selecione um componente clicando em qualquer card
+  3. Explore!
+
+  Componentes disponíveis:
+  • 🗺️  Mapa TomTom - Visualize o tráfego em tempo real
+  • 🧠 Algoritmo Inteligente - Teste a otimização
+  • 📊 Dashboard - Veja métricas e gráficos
+  • 🚌 Visualizador de Rota - Acompanhe ônibus
+  • ✅ Verificação da API - Status do sistema
+  • 📚 Documentação - Guias e referências
+
+═══════════════════════════════════════════════════════════════════════
+
+Opção 2: MENU DE CONTROLE (Mais Opções)
+────────────────────────────────────────
+  1. Abra: INICIAR_SISTEMA.bat (duplo-clique)
+  2. Escolha um número (1-9)
+  3. Aceite a ação
+
+  Opções disponíveis:
+  1 - Abrir Mapa TomTom
+  2 - Abrir Dashboard Completo
+  3 - Abrir Menu Principal
+  4 - Executar Algoritmo de Semáforos
+  5 - Testar Conexão com TomTom API
+  6 - Ver Documentação
+  7 - Ativar Ambiente Virtual
+  8 - Ver Guia de Uso
+  9 - Sair
+
+═══════════════════════════════════════════════════════════════════════
+
+Opção 3: ABRIR DIRETO (Se você sabe o que faz)
+──────────────────────────────────────────────
+  Clique nos arquivos diretamente:
+  • MENU_INTERATIVO.html → Menu web
+  • DASHBOARD_COMPLETO.html → Dashboard com gráficos
+  • mapa_tomtom_oficial.html → Mapa interativo
+
+═══════════════════════════════════════════════════════════════════════
+
+📊 ESTRUTURA DO SISTEMA
+
+     API TomTom
+         ▼
+    (Dados de Tráfego)
+         ▼
+    AWS EC2 (Coleta)
+    (A cada 5 min)
+         ▼
+  Snowflake (Armazena)
+  (Data Warehouse)
+         ▼
+  ┌──────────────────┐
+  │  Visualizações   │
+  ├──────────────────┤
+  │ • Mapas          │
+  │ • Dashboards     │
+  │ • Gráficos       │
+  └──────────────────┘
+         ▼
+  ┌──────────────────┐
+  │  Algoritmo       │
+  │  Inteligente     │
+  ├──────────────────┤
+  │ • Analisa tráfego│
+  │ • Otimiza semáf. │
+  │ • Registra ações │
+  └──────────────────┘
+
+═══════════════════════════════════════════════════════════════════════
+
+📖 ARQUIVOS IMPORTANTES
+
+Para Começar:
+  • INICIANTE_LEIA_PRIMEIRO.txt (Este arquivo)
+  • GUIA_COMPLETO_USO.md (Como usar cada componente)
+  • PROXIMOS_PASSOS.md (Próximas fases do projeto)
+
+Para Técnicos:
+  • PROJETO_FINAL.md (Documentação técnica)
+  • SUMARIO_EXECUTIVO.md (Resumo da solução)
+  • README.md (Visão geral)
+
+Executáveis:
+  • INICIAR_MENU.bat (Menu simples)
+  • INICIAR_SISTEMA.bat (Menu com muitas opções)
+
+Visualizações:
+  • MENU_INTERATIVO.html (Menu web interativo)
+  • DASHBOARD_COMPLETO.html (Dashboard com dados)
+  • mapa_tomtom_oficial.html (Mapa TomTom)
+
+═══════════════════════════════════════════════════════════════════════
+
+❓ DÚVIDAS FREQUENTES
+
+P: Como funciona o algoritmo?
+R: Ele:
+   1. Coleta dados de tráfego (velocidade, tempo de percurso)
+   2. Calcula o "fator de atraso" (quanto mais lento está)
+   3. Se muito lento, aumenta o tempo do semáforo
+   4. Se normal, mantém como está
+   5. Registra a ação no banco de dados
+
+P: Os dados são reais?
+R: Parcialmente:
+   ✓ Dados de tráfego: SIM (via API TomTom em tempo real)
+   ✗ Dashboard: NÃO (ainda com dados de exemplo)
+   
+   Próxima fase: Integrar dados reais do Snowflake
+
+P: Onde estão os dados?
+R: Em Belo Horizonte! O sistema monitora as principais vias:
+   • Avenida Afonso Pena
+   • Avenida Getúlio Vargas
+   • Rua Espírito Santo
+   • Avenida Brasil
+   E mais...
+
+P: Posso modificar os mapas?
+R: SIM! Abra qualquer .html em um editor de texto e modifique.
+
+P: O que é o Data Warehouse?
+R: Um banco de dados (Snowflake) que armazena:
+   • Métricas de tráfego
+   • Histórico de ajustes de semáforos
+   • Informações de vias e bairros
+   • Dimensões temporais
+
+═══════════════════════════════════════════════════════════════════════
+
+✅ VERIFICAÇÃO RÁPIDA
+
+Para confirmar que tudo está funcionando:
+
+1. Abra INICIAR_SISTEMA.bat
+2. Escolha opção 5 (Testar Conexão com TomTom API)
+3. Aguarde alguns segundos
+4. Você deve ver:
+   ✓ Conexão com TomTom bem-sucedida
+   ✓ Dados coletados
+   ✓ Fator de atraso calculado
+
+Se não vir isso, verifique:
+  • Conexão com a internet
+  • Arquivo .env preenchido corretamente
+  • Ambiente virtual ativado
+
+═══════════════════════════════════════════════════════════════════════
+
+🔧 PRÓXIMOS PASSOS
+
+Phase 1: Setup Inicial ✅ CONCLUÍDO
+Phase 2: Visualização  ✅ CONCLUÍDO
+Phase 3: Dados Reais   ⏳ EM ANDAMENTO
+
+Próximas melhorias:
+  • Integrar dados reais do Snowflake no dashboard
+  • Criar alertas de congestionamento crítico
+  • Adicionar predição com Machine Learning
+  • Melhorar coordenação entre semáforos
+
+═══════════════════════════════════════════════════════════════════════
+
+🚀 COMEÇAR AGORA!
+
+Abra este arquivo:
+  ➜ INICIAR_MENU.bat
+
+E comece a explorar!
+
+═══════════════════════════════════════════════════════════════════════
+
+Dúvidas? Consulte:
+  • GUIA_COMPLETO_USO.md - Manual de uso
+  • PROJETO_FINAL.md - Documentação técnica
+  • PROXIMOS_PASSOS.md - Plano de trabalho
+
+Bom experimento! 🎉
+
+═══════════════════════════════════════════════════════════════════════

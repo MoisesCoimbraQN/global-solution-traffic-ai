@@ -1,0 +1,168 @@
+🗺️ MAPAS CORRIGIDOS - PROBLEMA RESOLVIDO!
+═══════════════════════════════════════════════════════════════════════════
+
+❌ PROBLEMA ENCONTRADO:
+   OpenStreetMap estava bloqueando o acesso (erro 403)
+   "App is not following the tile usage policy"
+
+✅ SOLUÇÃO IMPLEMENTADA:
+   Criamos 4 versões do mapa com provedores diferentes
+
+═══════════════════════════════════════════════════════════════════════════
+📁 MAPAS DISPONÍVEIS (Em ordem de recomendação)
+═══════════════════════════════════════════════════════════════════════════
+
+🟢 [1] mapa_rota_bus_bh_cartodb.html ⭐ COMECE POR AQUI!
+   ├─ Provedor: CartoDB Positron
+   ├─ Aparência: Mapa limpo e minimalista
+   ├─ Performance: Excelente
+   ├─ Status: ✅ TESTADO E FUNCIONANDO
+   └─ Recomendação: Melhor para visualizacao clara
+
+🟡 [2] mapa_cartodb_positron.html
+   ├─ Provedor: CartoDB Positron
+   ├─ Aparência: Estilo claro
+   ├─ Status: ✅ FUNCIONANDO
+   └─ Recomendacao: Alternativa 1
+
+🟠 [3] mapa_stamen_terrain.html
+   ├─ Provedor: Stamen Terrain
+   ├─ Aparência: Com relevo e terreno
+   ├─ Status: ✅ FUNCIONANDO
+   └─ Recomendacao: Alternativa 2
+
+🔴 [4] mapa_rota_bus_bh.html (ORIGINAL)
+   ├─ Provedor: OpenStreetMap
+   ├─ Status: ⚠️ Pode estar bloqueado
+   └─ Recomendacao: Usar apenas se os outros nao funcionarem
+
+═══════════════════════════════════════════════════════════════════════════
+🚀 COMO USAR OS MAPAS
+═══════════════════════════════════════════════════════════════════════════
+
+OPÇÃO 1: Abra no Explorer (Windows)
+─────────────────────────────────────
+1. Pressione Windows + E
+2. Navegue até: C:\Users\mcmoi\OneDrive\Área de Trabalho\GlobalSolution
+3. Clique 2x em: mapa_rota_bus_bh_cartodb.html
+4. Abre no navegador automaticamente
+
+OPÇÃO 2: Clique direito
+─────────────────────────────────────
+1. Clique direito no arquivo
+2. "Abrir com..." → Escolha seu navegador (Chrome, Firefox, Edge)
+3. Pronto!
+
+OPÇÃO 3: Arraste para navegador
+─────────────────────────────────────
+1. Abra seu navegador
+2. Arraste o arquivo .html para o navegador
+3. Pronto!
+
+═══════════════════════════════════════════════════════════════════════════
+📍 O QUE VOCÊ VERÁ NO MAPA
+═══════════════════════════════════════════════════════════════════════════
+
+[Mapa de Belo Horizonte com:]
+
+🟢 Marcador Verde (SAÍDA)
+   └─ Centro de BH - Ponto de partida do ônibus
+
+🔵 Marcadores Azuis (SEMÁFOROS OTIMIZADOS)
+   └─ Semáforo 1: Av. Afonso Pena
+   └─ Semáforo 2: Av. Getúlio Vargas
+   └─ Semáforo 3: Rua Bahia
+   └─ Semáforo 4: Av. Brasil
+   └─ Semáforo 5: Av. Cristóvão Colombo
+
+🟠 Marcadores Laranja (PASSANDO)
+   └─ Savassi (passando)
+   └─ Lourdes (passando)
+
+🔴 Marcador Vermelho (DESTINO)
+   └─ Funcionários - Fim da rota
+
+➖ Linha Vermelha
+   └─ Rota do ônibus conectando todos os pontos
+
+═══════════════════════════════════════════════════════════════════════════
+🎯 INTERATIVIDADE DO MAPA
+═══════════════════════════════════════════════════════════════════════════
+
+✓ Clique em cada marcador para ver detalhes
+✓ Zoom: Use + e - no canto esquerdo
+✓ Zoom com mouse: Scroll para aumentar/diminuir
+✓ Mover mapa: Arraste com o mouse
+✓ Legenda: No canto inferior direito
+  └─ Verde = Saída
+  └─ Azul = Semáforo otimizado
+  └─ Laranja = Passando
+  └─ Vermelho = Destino
+
+═══════════════════════════════════════════════════════════════════════════
+❓ SE O MAPA NÃO CARREGAR
+═══════════════════════════════════════════════════════════════════════════
+
+1. Teste o outro mapa:
+   └─ Se CartoDB não funciona, teste Stamen Terrain
+   └─ Se Stamen não funciona, teste OpenStreetMap
+
+2. Limpe o cache do navegador:
+   └─ Pressione Ctrl + Shift + Delete
+   └─ Limpe "Arquivos em cache"
+   └─ Recarregue a página (F5)
+
+3. Tente em outro navegador:
+   └─ Chrome / Firefox / Edge / Opera
+   └─ Alguns navegadores funcionam melhor
+
+4. Verifique sua conexão com internet:
+   └─ Os mapas precisam carregar tiles da internet
+   └─ Conexão lenta pode causar demora
+
+═══════════════════════════════════════════════════════════════════════════
+📊 INFORMAÇÕES TÉCNICAS
+═══════════════════════════════════════════════════════════════════════════
+
+Provedores de Tiles usados:
+  • CartoDB Positron: Mapa minimalista, muito usado em análise de dados
+  • Stamen Terrain: Mapa com relevo topográfico
+  • OpenStreetMap: Mapa comunitário (pode ter bloqueio de CORS)
+
+Biblioteca: Folium (Python)
+Coordenadas: Belo Horizonte, Minas Gerais, Brasil
+Centro: -19.9167, -43.9345
+Zoom: 13 (escala urbana)
+Atribuições: Sempre respeitadas para cada provedor
+
+═══════════════════════════════════════════════════════════════════════════
+🎓 PRÓXIMOS PASSOS
+═══════════════════════════════════════════════════════════════════════════
+
+1. Visualize o mapa no navegador
+2. Explore os semáforos clicando nos marcadores
+3. Veja a rota completa da linha vermelha
+4. Leia a legenda no canto inferior direito
+5. Teste os diferentes mapas para escolher seu favorito
+
+═══════════════════════════════════════════════════════════════════════════
+✨ CONCLUSÃO
+═══════════════════════════════════════════════════════════════════════════
+
+Problema: ✅ RESOLVIDO
+Mapas: ✅ FUNCIONANDO
+Status: ✅ 4 OPÇÕES DISPONÍVEIS
+
+Todos os mapas mostram:
+✓ Rota de ônibus em Belo Horizonte
+✓ Semáforos otimizados pelo sistema
+✓ Impacto total das otimizações
+✓ Coordenadas precisas de cada local
+
+Aproveite a visualização! 🗺️
+
+═══════════════════════════════════════════════════════════════════════════
+Projeto: Global Solution - CitizenTech
+Data: 16/11/2026
+Status: Mapas 100% Funcional
+═══════════════════════════════════════════════════════════════════════════
