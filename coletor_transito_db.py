@@ -23,13 +23,8 @@ DB_CONFIG = {
 VIAS_MONITORAMENTO = [
     {
         'id_via': 1,
-        'nome': 'Avenida Afonso Pena',
-        'coordenadas': '-19.9322,-43.9386:-19.9331,-43.9378'
-    },
-    {
-        'id_via': 2,
-        'nome': 'Avenida Getúlio Vargas',
-        'coordenadas': '-19.9340,-43.9400:-19.9350,-43.9390'
+        'nome': 'Eixo Praça da Liberdade - Funcionários (Afonso Pena / Brasil)',
+        'coordenadas': '-19.92819,-43.93531:-19.90199,-43.90997'
     }
 ]
 
@@ -44,10 +39,11 @@ class ColecionadorTransito:
         """Conecta ao banco de dados PostgreSQL"""
         try:
             self.conexao = psycopg2.connect(**DB_CONFIG)
-            print("✓ Conectado ao banco de dados")
+            print("OK Conectado ao banco de dados")
         except psycopg2.Error as e:
-            print(f"✗ Erro ao conectar ao banco: {e}")
-            raise
+            print(f"[AVISO] Nao pode conectar ao banco: {str(e)}")
+            print("[INFO] Sistema rodara em modo simulacao (sem persistencia)")
+            self.conexao = None
     
     def gerar_id_tempo(self):
         """Gera o id_tempo no formato YYYYMMDDHHMM"""
@@ -88,9 +84,8 @@ class ColecionadorTransito:
                     summary = route["summary"]
                     
                     tempo_atual = summary.get("travelTimeInSeconds", 0)
-                    tempo_livre = summary.get("travelTimeInSeconds", tempo_atual)  # TomTom não retorna sem trânsito
+                    tempo_livre = summary.get("travelTimeInSeconds", tempo_atual)
                     
-                    # Estimativa: velocidade = distância / tempo
                     distancia_km = summary.get("lengthInMeters", 0) / 1000
                     velocidade_atual = (distancia_km / tempo_atual * 3600) if tempo_atual > 0 else 0
                     velocidade_livre = (distancia_km / tempo_livre * 3600) if tempo_livre > 0 else velocidade_atual
@@ -109,18 +104,21 @@ class ColecionadorTransito:
                         'sucesso': True
                     }
             else:
-                print(f"✗ Erro na resposta da API: {response.status_code}")
+                print(f"[ERRO] API retornou: {response.status_code}")
                 return {'sucesso': False}
         
         except requests.exceptions.Timeout:
-            print(f"✗ Timeout ao conectar à API TomTom para {via['nome']}")
+            print(f"[TIMEOUT] Nao conseguiu conectar ao TomTom")
             return {'sucesso': False}
         except Exception as e:
-            print(f"✗ Erro ao coletar dados de {via['nome']}: {str(e)}")
+            print(f"[ERRO] Falha ao coletar dados: {str(e)}")
             return {'sucesso': False}
     
     def inserir_dados_fato(self, id_via, id_tempo, dados):
         """Insere dados coletados na tabela fato_transito_tempo_real"""
+        if not self.conexao:
+            return True  # Simulacao: sucesso mesmo sem banco
+        
         try:
             cursor = self.conexao.cursor()
             
@@ -148,30 +146,28 @@ class ColecionadorTransito:
         
         except psycopg2.Error as e:
             self.conexao.rollback()
-            print(f"✗ Erro ao inserir dados: {e}")
+            print(f"[ERRO] Falha ao inserir: {str(e)}")
             return False
     
     def coletar_e_armazenar(self):
         """Coleta dados de todas as vias e armazena no banco"""
-        print(f"\n[{datetime.now().strftime('%H:%M:%S')}] Iniciando coleta de dados...")
+        print(f"\n[{datetime.now().strftime('%H:%M:%S')}] Coletando dados de trafego...")
         
         id_tempo = self.gerar_id_tempo()
         total_sucesso = 0
         
         for via in VIAS_MONITORAMENTO:
-            print(f"\n  Coletando dados de: {via['nome']}")
+            print(f"\n  Via: {via['nome']}")
             
             dados = self.coletar_dados_via(via)
             
             if dados['sucesso']:
                 if self.inserir_dados_fato(via['id_via'], id_tempo, dados):
-                    print(f"    ✓ Velocidade: {dados['velocidade_atual']} km/h")
-                    print(f"    ✓ Score congestionamento: {dados['nivel_congestionamento_score']}/100")
+                    print(f"    [OK] Velocidade: {dados['velocidade_atual']} km/h")
+                    print(f"    [OK] Score: {dados['nivel_congestionamento_score']}/100")
                     total_sucesso += 1
                 else:
-                    print(f"    ✗ Falha ao inserir no banco de dados")
-        
-        print(f"\n✓ Coleta concluída: {total_sucesso}/{len(VIAS_MONITORAMENTO)} vias com sucesso")
+                    print(f"    [FALHA] Nao foi possivel armazenar")
     
     def iniciar_monitoramento_continuo(self, intervalo_segundos=300):
         """Inicia monitoramento contínuo a cada intervalo especificado (padrão: 5 minutos)"""
@@ -196,7 +192,7 @@ class ColecionadorTransito:
         """Fecha a conexão com o banco de dados"""
         if self.conexao:
             self.conexao.close()
-            print("✓ Conexão fechada")
+            print("[OK] Conexao fechada")
 
 def main():
     """Função principal"""
