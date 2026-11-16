@@ -881,6 +881,27 @@
             }
         });
 
+        // ========================================
+        // AUTO-REFRESH E ATUALIZAÇÃO DE GRÁFICOS
+        // ========================================
+        
+        // Função para atualizar gráficos com dados da API
+        function atualizarGraficos(data) {
+            if (charts.traffic && data.velocidade_media) {
+                // Atualizar gráfico de tráfego com base na velocidade
+                charts.traffic.data.datasets[0].data[0] = data.velocidade_media;
+                charts.traffic.update();
+            }
+            
+            if (charts.algorithm && data.total_registros) {
+                // Atualizar gráfico do algoritmo com base no total de registros
+                charts.algorithm.data.datasets[0].data[0] = data.total_registros;
+                charts.algorithm.update();
+            }
+            
+            console.log('[Gráficos Dashboard Completo] Atualizados');
+        }
+
         // Atualizar timestamp
         function updateTimestamp() {
             const now = new Date();
@@ -888,9 +909,57 @@
             document.getElementById('lastUpdate').textContent = `Última atualização: ${timeStr}`;
         }
 
-        // Atualizar a cada 30 segundos
-        setInterval(updateTimestamp, 30000);
-        updateTimestamp();
+        // Auto-refresh a cada 30 segundos
+        let refreshInterval = setInterval(function() {
+            fetch('/api/metricas')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('[Dashboard] Dados atualizados:', data);
+                    
+                    // Atualizar gráficos
+                    atualizarGraficos(data);
+                    
+                    // Atualizar elementos com atributo data-metric
+                    document.querySelectorAll('[data-metric]').forEach(element => {
+                        const metric = element.dataset.metric;
+                        if (data[metric] !== undefined) {
+                            element.textContent = data[metric];
+                        }
+                    });
+                    
+                    // Atualizar timestamp
+                    updateTimestamp();
+                    
+                    // Atualizar status visual
+                    const statusEl = document.getElementById('refresh-status');
+                    if (statusEl) {
+                        statusEl.textContent = 'Atualizado em: ' + new Date().toLocaleTimeString('pt-BR');
+                        statusEl.style.color = '#4caf50';
+                    }
+                })
+                .catch(error => {
+                    console.error('[Dashboard] Erro ao buscar dados:', error);
+                    const statusEl = document.getElementById('refresh-status');
+                    if (statusEl) {
+                        statusEl.textContent = 'Erro ao conectar';
+                        statusEl.style.color = '#f44336';
+                    }
+                });
+        }, 30000);
+
+        // Primeira atualização imediata
+        fetch('/api/metricas')
+            .then(response => response.json())
+            .then(data => {
+                console.log('[Dashboard] Carregamento inicial:', data);
+                atualizarGraficos(data);
+                updateTimestamp();
+            });
+
+        // Parar refresh ao sair da página
+        window.addEventListener('beforeunload', function() {
+            clearInterval(refreshInterval);
+        });
     </script>
 
     <div id="refresh-status" style="position: fixed; bottom: 20px; right: 20px; 
@@ -898,85 +967,5 @@
          font-size: 12px; z-index: 9999; box-shadow: 0 2px 10px rgba(0,0,0,0.3);">
         Carregando...
     </div>
-        
-<script>
-// Auto-refresh a cada 30 segundos
-let refreshInterval = setInterval(function() {
-    fetch('/api/metricas')
-        .then(response => response.json())
-        .then(data => {
-            console.log('[Dashboard] Dados atualizados:', data);
-            
-            // Atualizar gráficos
-            atualizarGraficos(data);
-            
-            // Atualizar elementos com atributo data-metric
-            document.querySelectorAll('[data-metric]').forEach(element => {
-                const metric = element.dataset.metric;
-                if (data[metric] !== undefined) {
-                    element.textContent = data[metric];
-                }
-            });
-            
-            // Atualizar timestamp
-            const timestamp = new Date().toLocaleTimeString('pt-BR');
-            const statusEl = document.getElementById('refresh-status');
-            if (statusEl) {
-                statusEl.textContent = 'Atualizado em: ' + timestamp;
-                statusEl.style.color = '#4caf50';
-            }
-            
-            // Se há dados, esconder aviso de simulação
-            if (data.status === 'conectado') {
-                const avisoEl = document.getElementById('aviso-simulacao');
-                if (avisoEl) avisoEl.style.display = 'none';
-            }
-        })
-        .catch(error => {
-            console.error('[Dashboard] Erro ao buscar dados:', error);
-            const statusEl = document.getElementById('refresh-status');
-            if (statusEl) {
-                statusEl.textContent = 'Erro ao conectar';
-                statusEl.style.color = '#f44336';
-            }
-        });
-}, 30000); // 30 segundos
-
-// Primeira atualização imediata
-fetch('/api/metricas')
-    .then(response => response.json())
-    .then(data => {
-        console.log('[Dashboard] Carregamento inicial:', data);
-        
-        // Atualizar gráficos
-        atualizarGraficos(data);
-        
-        // Atualizar cards com métricas
-        const metricas = {
-            'velocidade_media': document.querySelector('[data-metric="velocidade_media"]'),
-            'tempo_medio': document.querySelector('[data-metric="tempo_medio"]'),
-            'total_registros': document.querySelector('[data-metric="total_registros"]')
-        };
-        
-        for (let [key, element] of Object.entries(metricas)) {
-            if (element && data[key] !== undefined) {
-                element.textContent = data[key];
-            }
-        }
-        
-        // Atualizar status
-        const statusEl = document.getElementById('refresh-status');
-        if (statusEl) {
-            const timestamp = new Date().toLocaleTimeString('pt-BR');
-            statusEl.textContent = 'Atualizado em: ' + timestamp;
-            statusEl.style.color = data.status === 'conectado' ? '#4caf50' : '#ff9800';
-        }
-    });
-
-// Parar refresh ao sair da página
-window.addEventListener('beforeunload', function() {
-    clearInterval(refreshInterval);
-});
-</script>
 </body>
 </html>

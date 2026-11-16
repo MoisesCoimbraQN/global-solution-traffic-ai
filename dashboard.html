@@ -541,28 +541,24 @@
                 }
             }
         });
-    </script>
-
-    <div id="refresh-status" style="position: fixed; bottom: 20px; right: 20px; 
-         background: #333; color: #fff; padding: 10px 15px; border-radius: 5px; 
-         font-size: 12px; z-index: 9999; box-shadow: 0 2px 10px rgba(0,0,0,0.3);">
-        Carregando...
-    </div>
         
-<script>
-// Função para atualizar gráficos com dados da API
-function atualizarGraficos(data) {
-    // Simulação de dados por velocidade (já que API retorna agregados)
-    // Em produção, seria necessário expandir API para retornar mais granularidade
-    
-    // Atualizar gráfico de velocidade com velocidade_media
-    if (charts.velocidade && data.velocidade_media) {
-        charts.velocidade.data.datasets[0].data = [
-            data.velocidade_media,
-            data.velocidade_media + 5,
-            data.velocidade_media - 2,
-            data.velocidade_media + 8,
-            data.velocidade_media - 1,
+        // ========================================
+        // AUTO-REFRESH E ATUALIZAÇÃO DE GRÁFICOS
+        // ========================================
+        
+        // Função para atualizar gráficos com dados da API
+        function atualizarGraficos(data) {
+            // Simulação de dados por velocidade (já que API retorna agregados)
+            // Em produção, seria necessário expandir API para retornar mais granularidade
+            
+            // Atualizar gráfico de velocidade com velocidade_media
+            if (charts.velocidade && data.velocidade_media) {
+                charts.velocidade.data.datasets[0].data = [
+                    data.velocidade_media,
+                    data.velocidade_media + 5,
+                    data.velocidade_media - 2,
+                    data.velocidade_media + 8,
+                    data.velocidade_media - 1,
             data.velocidade_media + 3
         ];
         charts.velocidade.update();
@@ -663,6 +659,12 @@ fetch('/api/metricas')
 window.addEventListener('beforeunload', function() {
     clearInterval(refreshInterval);
 });
-</script>
+    </script>
+
+    <div id="refresh-status" style="position: fixed; bottom: 20px; right: 20px; 
+         background: #333; color: #fff; padding: 10px 15px; border-radius: 5px; 
+         font-size: 12px; z-index: 9999; box-shadow: 0 2px 10px rgba(0,0,0,0.3);">
+        Carregando...
+    </div>
 </body>
 </html>
