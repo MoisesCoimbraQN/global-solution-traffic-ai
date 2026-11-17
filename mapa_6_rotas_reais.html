@@ -146,7 +146,6 @@
             border-top: 1px solid #ddd;
         }
         
-        /* Estilos para tooltips dos semáforos */
         .leaflet-tooltip {
             background-color: rgba(0, 0, 0, 0.9);
             border: 1px solid #666;
@@ -157,14 +156,6 @@
             font-weight: 500;
             white-space: nowrap;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-        }
-        
-        .leaflet-tooltip-left {
-            margin-left: -6px;
-        }
-        
-        .leaflet-tooltip-right {
-            margin-left: 6px;
         }
         
         @media (max-width: 768px) {
@@ -189,10 +180,10 @@
                 <span class="status-badge">🟢 ONLINE</span>
             </div>
             <div class="item">
-                <i class="fas fa-database"></i> API em Tempo Real
+                <i class="fas fa-database"></i> Sincronizado com AWS (5 min)
             </div>
             <div class="item">
-                <span class="update-counter">↻ <span id="update-count">0</span>s</span>
+                <span class="update-counter">↻ Ciclos: <span id="update-count">0</span></span>
             </div>
         </div>
     </div>
@@ -235,33 +226,24 @@
         <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd; font-size: 11px;">
             <p><b>✓ Todas as rotas sobre ruas e avenidas reais</b></p>
             <p><b>✓ 18 Semáforos em cruzamentos reais</b></p>
-            <p><b>✓ Atualização a cada 5 segundos</b></p>
+            <p><b>✓ Atualização a cada 5 minutos (AWS Sync)</b></p>
         </div>
     </div>
     
     <script>
         const BASE_URL = window.location.origin;
-        const UPDATE_INTERVAL = 5000;
+        const UPDATE_INTERVAL = 300000; // 5 minutos (300.000 ms) igual à coleta da AWS EC2
         
         let map;
         let rotas_markers = {};
         let rotas_polylines = {};
         let update_counter = 0;
-        
-        // ROTAS SOBRE RUAS REAIS DE BELO HORIZONTE - COM PONTOS INTERMEDIÁRIOS PARA SEGUIR AS RUAS
-        // Rotas serão carregadas do TomTom via API
         let rotas_reais = [];
         
         function getCorPorVelocidade(velocidade) {
             if (velocidade > 30) return '#2ecc71';
             if (velocidade > 15) return '#f39c12';
             return '#e74c3c';
-        }
-        
-        function getTamanhoPorTipo(index) {
-            if (index === 0) return 15;
-            if (index === 4) return 15;
-            return 12;
         }
         
         function criarMapa() {
@@ -277,89 +259,45 @@
                 opacity: 0.7,
                 maxZoom: 18
             }).addTo(map);
-            
-            console.log('✓ Mapa criado com sucesso');
         }
         
         async function carregarRotasDaTomTom() {
             try {
-                console.log('🌐 Carregando rotas reais do TomTom...');
                 const response = await fetch(`${BASE_URL}/api/rotas-tomtom`);
                 const data = await response.json();
                 
-                console.log(`📦 Resposta da API: ${data.total_rotas} rotas`);
-                
                 if (data.rotas && data.rotas.length > 0) {
-                    rotas_reais = data.rotas.map(rota => {
-                        // Validar coordenadas
-                        if (!rota.coordenadas || rota.coordenadas.length === 0) {
-                            console.warn(`⚠️ Rota ${rota.id} sem coordenadas!`);
-                            return null;
-                        }
-                        
-                        return {
-                            id: rota.id,
-                            nome: rota.nome,
-                            cor: rota.cor,
-                            coordenadas: rota.coordenadas,
-                            tempo_viagem_segundos: rota.tempo_viagem_segundos,
-                            atraso_segundos: rota.atraso_segundos,
-                            velocidade_media: rota.velocidade_media
-                        };
-                    }).filter(r => r !== null);
-                    
-                    console.log(`✅ ${rotas_reais.length} rotas válidas carregadas`);
-                    rotas_reais.forEach(r => console.log(`   Rota ${r.id}: ${r.coordenadas.length} pontos`));
+                    rotas_reais = data.rotas.filter(rota => rota.coordenadas && rota.coordenadas.length > 0);
                     return true;
                 }
             } catch (error) {
-                console.error('❌ Erro ao carregar rotas TomTom:', error);
+                console.error('Erro ao carregar rotas TomTom:', error);
             }
             return false;
         }
         
         function desenharRotasIniciais() {
-            console.log(`🗺️ Desenhando ${rotas_reais.length} rotas com dados REAIS do TomTom...`);
+            if (rotas_reais.length === 0) return;
             
-            if (rotas_reais.length === 0) {
-                console.error('❌ Nenhuma rota para desenhar!');
-                return;
-            }
-            
-            rotas_reais.forEach((rota, idx) => {
+            rotas_reais.forEach((rota) => {
                 try {
-                    console.log(`\n📍 Desenhando Rota ${rota.id}/${rotas_reais.length}: ${rota.nome}`);
-                    
-                    // Validação
-                    if (!rota.coordenadas || rota.coordenadas.length === 0) {
-                        console.error(`  ❌ Rota ${rota.id} sem coordenadas!`);
-                        return;
-                    }
-                    
-                    // Converter coordenadas para formato [lat, lng]
                     const coordinates = rota.coordenadas.map(p => [p.lat, p.lng]);
-                    console.log(`  ✓ ${coordinates.length} coordenadas convertidas`);
                     
-                    // CRIAR POLYLINE COM TODOS OS PONTOS REAIS DO TOMTOM
                     if (rotas_polylines[rota.id]) {
-                        console.warn(`  ⚠️ Polyline ${rota.id} já existe, removendo...`);
                         map.removeLayer(rotas_polylines[rota.id]);
                     }
                     
                     rotas_polylines[rota.id] = L.polyline(coordinates, {
                         color: rota.cor,
                         weight: 5,
-                        opacity: 0.85,
-                        dashArray: '0'
+                        opacity: 0.85
                     }).addTo(map);
-                    console.log(`  ✓ Polyline criada (cor: ${rota.cor})`);
                     
-                    // Desenhar marcadores
                     if (!rotas_markers[rota.id]) {
                         rotas_markers[rota.id] = [];
                     }
                     
-                    // Marcador de início (círculo maior verde)
+                    // Marcador de início
                     const inicio = L.circleMarker([coordinates[0][0], coordinates[0][1]], {
                         radius: 12,
                         fillColor: '#2ecc71',
@@ -369,108 +307,79 @@
                         fillOpacity: 0.95
                     }).addTo(map);
                     
-                    const popupInicio = `
+                    inicio.bindPopup(`
                         <div class="popup-content">
                             <h4>🚀 Rota ${rota.id}</h4>
                             <p><b>Nome:</b> ${rota.nome}</p>
                             <p><b>Status:</b> ✓ Ativo</p>
-                            <p><b>Pontos:</b> ${coordinates.length}</p>
                             <p><b>Tempo:</b> ${(rota.tempo_viagem_segundos / 60).toFixed(1)} min</p>
                         </div>
-                    `;
-                    inicio.bindPopup(popupInicio);
+                    `);
                     inicio.bindTooltip('Início da rota');
                     rotas_markers[rota.id][0] = inicio;
-                    console.log(`  ✓ Marcador de início criado`);
                     
-                    // Desenhar semáforos intermediários (a cada ~40 pontos)
+                    // Semáforos intermediários
                     const intervalo = Math.max(1, Math.floor(coordinates.length / 4));
-                    let semaforos_criados = 0;
                     
                     for (let i = intervalo; i < coordinates.length - intervalo; i += intervalo) {
-                        try {
-                            const semaforo = L.circleMarker([coordinates[i][0], coordinates[i][1]], {
-                                radius: 8,
-                                fillColor: '#f39c12',
-                                color: '#d68910',
-                                weight: 2,
-                                opacity: 1,
-                                fillOpacity: 0.9
-                            }).addTo(map);
-                            
-                            const numSemaforo = Math.floor((i / intervalo));
-                            
-                            // Calcular posição percentual na rota (0-100%)
-                            const percentualRota = Math.round((i / coordinates.length) * 100);
-                            
-                            // Determinaer estado com base em velocidade e atraso
-                            let estado = 'ℹ️ Monitorando';
-                            let statusCor = '#3498db';
-                            if (rota.atraso_segundos > 300) {
-                                estado = '⚠️ Muito Atrasado';
-                                statusCor = '#e74c3c';
-                            } else if (rota.atraso_segundos > 120) {
-                                estado = '⚠️ Atrasado';
-                                statusCor = '#f39c12';
-                            } else if (rota.atraso_segundos > 30) {
-                                estado = '😐 Ligeiramente Atrasado';
-                                statusCor = '#f1c40f';
-                            } else if (rota.atraso_segundos === 0) {
-                                estado = '✅ No Horário';
-                                statusCor = '#2ecc71';
-                            }
-                            
-                            // Determinar se semáforo está "fechando" (congestionado)
-                            let congestao = 'Fluxo Livre';
-                            if (rota.velocidade_media < 15) {
-                                congestao = '🔴 Muito Congestionado';
-                            } else if (rota.velocidade_media < 25) {
-                                congestao = '🟠 Congestionado';
-                            } else if (rota.velocidade_media < 35) {
-                                congestao = '🟡 Moderado';
-                            } else {
-                                congestao = '🟢 Fluxo Livre';
-                            }
-                            
-                            const popupSemaforo = `
-                                <div class="popup-content" style="border-left: 4px solid ${statusCor}; padding-left: 12px;">
-                                    <h4>🚦 Semáforo ${numSemaforo}</h4>
-                                    <p><b>Rota:</b> ${rota.id} - ${rota.nome}</p>
-                                    <hr style="margin: 8px 0; border: none; border-top: 1px solid #ddd;">
-                                    <p><b>Posição:</b> ${percentualRota}% da rota</p>
-                                    <p><b>Velocidade Média:</b> ${rota.velocidade_media} km/h</p>
-                                    <p><b>Fluxo:</b> ${congestao}</p>
-                                    <hr style="margin: 8px 0; border: none; border-top: 1px solid #ddd;">
-                                    <p style="color: ${statusCor}; font-weight: bold;"><b>Estado:</b> ${estado}</p>
-                                    <p><b>Atraso:</b> ${Math.floor(rota.atraso_segundos / 60)}min ${rota.atraso_segundos % 60}s</p>
-                                    <p><b>Tempo de Viagem:</b> ${Math.floor(rota.tempo_viagem_segundos / 60)}min</p>
-                                </div>
-                            `;
-                            
-                            const tooltipText = `${estado} | ${congestao} | ${rota.velocidade_media} km/h`;
-                            
-                            semaforo.bindPopup(popupSemaforo);
-                            semaforo.bindTooltip(tooltipText, { sticky: false, offset: L.point(0, -20) });
-                            
-                            // Evento de mouse para update em tempo real
-                            semaforo.on('mouseover', function() {
-                                this.setRadius(10);
-                                this.setStyle({ weight: 3 });
-                            });
-                            semaforo.on('mouseout', function() {
-                                this.setRadius(8);
-                                this.setStyle({ weight: 2 });
-                            });
-                            
-                            rotas_markers[rota.id][i] = semaforo;
-                            semaforos_criados++;
-                        } catch (e) {
-                            console.error(`  ❌ Erro ao criar semáforo em índice ${i}:`, e);
+                        const semaforo = L.circleMarker([coordinates[i][0], coordinates[i][1]], {
+                            radius: 8,
+                            fillColor: '#f39c12',
+                            color: '#d68910',
+                            weight: 2,
+                            opacity: 1,
+                            fillOpacity: 0.9
+                        }).addTo(map);
+                        
+                        const numSemaforo = Math.floor(i / intervalo);
+                        const percentualRota = Math.round((i / coordinates.length) * 100);
+                        
+                        let estado = 'ℹ️ Monitorando';
+                        let statusCor = '#3498db';
+                        if (rota.atraso_segundos > 300) {
+                            estado = '⚠️ Muito Atrasado';
+                            statusCor = '#e74c3c';
+                        } else if (rota.atraso_segundos > 120) {
+                            estado = '⚠️ Atrasado';
+                            statusCor = '#f39c12';
+                        } else if (rota.atraso_segundos > 30) {
+                            estado = '😐 Ligeiramente Atrasado';
+                            statusCor = '#f1c40f';
+                        } else if (rota.atraso_segundos === 0) {
+                            estado = '✅ No Horário';
+                            statusCor = '#2ecc71';
                         }
+                        
+                        let congestao = '🟢 Fluxo Livre';
+                        if (rota.velocidade_media < 15) congestao = '🔴 Muito Congestionado';
+                        else if (rota.velocidade_media < 25) congestao = '🟠 Congestionado';
+                        else if (rota.velocidade_media < 35) congestao = '🟡 Moderado';
+                        
+                        const popupSemaforo = `
+                            <div class="popup-content" style="border-left: 4px solid ${statusCor}; padding-left: 12px;">
+                                <h4>🚦 Semáforo ${numSemaforo}</h4>
+                                <p><b>Rota:</b> ${rota.id} - ${rota.nome}</p>
+                                <hr>
+                                <p><b>Posição:</b> ${percentualRota}% da rota</p>
+                                <p><b>Velocidade Média:</b> ${rota.velocidade_media} km/h</p>
+                                <p><b>Fluxo:</b> ${congestao}</p>
+                                <hr>
+                                <p style="color: ${statusCor}; font-weight: bold;"><b>Estado:</b> ${estado}</p>
+                                <p><b>Atraso:</b> ${Math.floor(rota.atraso_segundos / 60)}min ${rota.atraso_segundos % 60}s</p>
+                                <p><b>Tempo de Viagem:</b> ${Math.floor(rota.tempo_viagem_segundos / 60)}min</p>
+                            </div>
+                        `;
+                        
+                        semaforo.bindPopup(popupSemaforo);
+                        semaforo.bindTooltip(`${estado} | ${congestao} | ${rota.velocidade_media} km/h`, { sticky: false, offset: L.point(0, -20) });
+                        
+                        semaforo.on('mouseover', function() { this.setRadius(10); this.setStyle({ weight: 3 }); });
+                        semaforo.on('mouseout', function() { this.setRadius(8); this.setStyle({ weight: 2 }); });
+                        
+                        rotas_markers[rota.id][i] = semaforo;
                     }
-                    console.log(`  ✓ ${semaforos_criados} semáforos criados`);
                     
-                    // Marcador de fim (círculo maior vermelho)
+                    // Marcador de fim
                     const fim = L.circleMarker([coordinates[coordinates.length - 1][0], coordinates[coordinates.length - 1][1]], {
                         radius: 12,
                         fillColor: '#e74c3c',
@@ -480,26 +389,20 @@
                         fillOpacity: 0.95
                     }).addTo(map);
                     
-                    const popupFim = `
+                    fim.bindPopup(`
                         <div class="popup-content">
                             <h4>🏁 Rota ${rota.id} - Destino</h4>
                             <p><b>Nome:</b> ${rota.nome}</p>
                             <p><b>Status:</b> ✓ Ativo</p>
                         </div>
-                    `;
-                    fim.bindPopup(popupFim);
+                    `);
                     fim.bindTooltip('Destino da rota');
                     rotas_markers[rota.id][coordinates.length - 1] = fim;
-                    console.log(`  ✓ Marcador de fim criado`);
-                    
-                    console.log(`✅ Rota ${rota.id} completa!`);
                     
                 } catch (error) {
-                    console.error(`❌ ERRO ao desenhar Rota ${rota.id}:`, error);
+                    console.error(`Erro ao desenhar Rota ${rota.id}:`, error);
                 }
             });
-            
-            console.log(`\n✅✅✅ Todas as ${rotas_reais.length} rotas desenhadas com sucesso!`);
         }
         
         async function atualizarMapa() {
@@ -510,105 +413,59 @@
                 update_counter++;
                 document.getElementById('update-count').textContent = update_counter;
                 
-                console.log(`📡 Atualização #${update_counter}: ${data.rotas.length} rotas`);
-                console.log(`   Polylines no mapa: ${Object.keys(rotas_polylines).length}`);
-                console.log(`   Markers no mapa: ${Object.keys(rotas_markers).length}`);
-                
-                data.rotas.forEach((rota, index) => {
+                data.rotas.forEach((rota) => {
                     if (rotas_polylines[rota.id]) {
                         const cor_velocidade = getCorPorVelocidade(rota.velocidade_media);
-                        rotas_polylines[rota.id].setStyle({
-                            color: cor_velocidade
-                        });
-                        console.log(`  ✓ Rota ${rota.id}: velocidade ${rota.velocidade_media} km/h → cor ${cor_velocidade}`);
+                        rotas_polylines[rota.id].setStyle({ color: cor_velocidade });
                         
-                        // Atualizar tooltips dos semáforos desta rota
                         if (rotas_markers[rota.id]) {
                             Object.keys(rotas_markers[rota.id]).forEach(markerIndex => {
                                 const marker = rotas_markers[rota.id][markerIndex];
-                                if (marker && marker._popup && marker._tooltip) {
-                                    // Recalcular estado baseado em dados atualizados
+                                if (marker && marker._popup && marker._tooltip && markerIndex != 0) {
                                     let estado = 'ℹ️ Monitorando';
                                     let statusCor = '#3498db';
-                                    if (rota.atraso_segundos > 300) {
-                                        estado = '⚠️ Muito Atrasado';
-                                        statusCor = '#e74c3c';
-                                    } else if (rota.atraso_segundos > 120) {
-                                        estado = '⚠️ Atrasado';
-                                        statusCor = '#f39c12';
-                                    } else if (rota.atraso_segundos > 30) {
-                                        estado = '😐 Ligeiramente Atrasado';
-                                        statusCor = '#f1c40f';
-                                    } else if (rota.atraso_segundos === 0) {
-                                        estado = '✅ No Horário';
-                                        statusCor = '#2ecc71';
-                                    }
+                                    if (rota.atraso_segundos > 300) { estado = '⚠️ Muito Atrasado'; statusCor = '#e74c3c'; }
+                                    else if (rota.atraso_segundos > 120) { estado = '⚠️ Atrasado'; statusCor = '#f39c12'; }
+                                    else if (rota.atraso_segundos > 30) { estado = '😐 Ligeiramente Atrasado'; statusCor = '#f1c40f'; }
+                                    else if (rota.atraso_segundos === 0) { estado = '✅ No Horário'; statusCor = '#2ecc71'; }
                                     
-                                    let congestao = 'Fluxo Livre';
-                                    if (rota.velocidade_media < 15) {
-                                        congestao = '🔴 Muito Congestionado';
-                                    } else if (rota.velocidade_media < 25) {
-                                        congestao = '🟠 Congestionado';
-                                    } else if (rota.velocidade_media < 35) {
-                                        congestao = '🟡 Moderado';
-                                    } else {
-                                        congestao = '🟢 Fluxo Livre';
-                                    }
+                                    let congestao = '🟢 Fluxo Livre';
+                                    if (rota.velocidade_media < 15) congestao = '🔴 Muito Congestionado';
+                                    else if (rota.velocidade_media < 25) congestao = '🟠 Congestionado';
+                                    else if (rota.velocidade_media < 35) congestao = '🟡 Moderado';
                                     
-                                    // Atualizar tooltip com informações em tempo real
-                                    const tooltipText = `${estado} | ${congestao} | ${rota.velocidade_media} km/h`;
-                                    marker.setTooltipContent(tooltipText);
-                                    
-                                    // Atualizar popup também
-                                    const popupContent = `
+                                    marker.setTooltipContent(`${estado} | ${congestao} | ${rota.velocidade_media} km/h`);
+                                    marker.setPopupContent(`
                                         <div class="popup-content" style="border-left: 4px solid ${statusCor}; padding-left: 12px;">
-                                            <h4>🚦 Semáforo ${markerIndex}</h4>
+                                            <h4>🚦 Semáforo</h4>
                                             <p><b>Rota:</b> ${rota.id} - ${rota.nome}</p>
-                                            <hr style="margin: 8px 0; border: none; border-top: 1px solid #ddd;">
+                                            <hr>
                                             <p><b>Velocidade Média:</b> ${rota.velocidade_media} km/h</p>
                                             <p><b>Fluxo:</b> ${congestao}</p>
-                                            <hr style="margin: 8px 0; border: none; border-top: 1px solid #ddd;">
+                                            <hr>
                                             <p style="color: ${statusCor}; font-weight: bold;"><b>Estado:</b> ${estado}</p>
                                             <p><b>Atraso:</b> ${Math.floor(rota.atraso_segundos / 60)}min ${rota.atraso_segundos % 60}s</p>
                                             <p><b>Tempo de Viagem:</b> ${Math.floor(rota.tempo_viagem_segundos / 60)}min</p>
-                                            <p style="font-size: 10px; color: #999; margin-top: 6px;"><i>Atualizado há ${update_counter} ciclos</i></p>
+                                            <p style="font-size: 10px; color: #999; margin-top: 6px;"><i>Ciclo #${update_counter} (5 min)</i></p>
                                         </div>
-                                    `;
-                                    marker.setPopupContent(popupContent);
+                                    `);
                                 }
                             });
                         }
-                    } else {
-                        console.warn(`  ⚠️ Rota ${rota.id} NÃO TEM POLYLINE!`);
                     }
                 });
             } catch (error) {
-                console.error('❌ Erro ao atualizar mapa:', error.message);
+                console.error('Erro ao atualizar mapa:', error.message);
             }
-        }
-        
-        function atualizarRota(layout, dados) {
-            // Esta função não é mais usada
-            console.log('Função atualizarRota chamada (obsoleta)');
         }
         
         window.addEventListener('load', async () => {
             criarMapa();
-            
-            // Carregar rotas reais do TomTom ANTES de desenhar
             const rotasCarregadas = await carregarRotasDaTomTom();
             
             if (rotasCarregadas && rotas_reais.length > 0) {
                 desenharRotasIniciais();
-                
-                // Aguardar 2 segundos para garantir que tudo foi desenhado
-                setTimeout(() => {
-                    console.log('✅ Iniciando atualizações automáticas...');
-                    atualizarMapa();
-                    setInterval(atualizarMapa, UPDATE_INTERVAL);
-                }, 2000);
-            } else {
-                console.error('❌ Falha ao carregar rotas do TomTom');
+                setInterval(atualizarMapa, UPDATE_INTERVAL); // Atualiza a cada 5 minutos
             }
         });
     </script>

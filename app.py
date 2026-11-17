@@ -6,6 +6,7 @@ Flask API para servir dashboards e dados em tempo real
 from flask import Flask, jsonify
 import os
 import psycopg2
+import requests
 from dotenv import load_dotenv
 from datetime import datetime
 import logging
@@ -227,32 +228,14 @@ def dashboard_mapa():
     except FileNotFoundError:
         return "Mapa não encontrado", 404
 
-@app.route('/dashboard/mapa-multiplas-rotas')
-def dashboard_mapa_multiplas_rotas():
-    """Serve o Mapa com Múltiplas Rotas (Estático)"""
-    try:
-        with open('mapa_multiplas_rotas.html', 'r', encoding='utf-8') as f:
-            return f.read()
-    except FileNotFoundError:
-        return "Mapa de múltiplas rotas não encontrado", 404
-
 @app.route('/dashboard/mapa-6-rotas-reais')
 def dashboard_mapa_6_rotas_reais():
-    """Serve o Mapa com 6 Rotas Sobre Ruas Reais de Belo Horizonte"""
+    """Rota alternativa para o Mapa com 6 Rotas Sobre Ruas Reais"""
     try:
         with open('mapa_6_rotas_reais.html', 'r', encoding='utf-8') as f:
             return f.read()
     except FileNotFoundError:
         return "Mapa de 6 rotas reais não encontrado", 404
-
-@app.route('/dashboard/mapa-dinamico')
-def dashboard_mapa_dinamico():
-    """Serve o Mapa com Múltiplas Rotas com Atualização Dinâmica"""
-    try:
-        with open('mapa_multiplas_rotas_dinamico.html', 'r', encoding='utf-8') as f:
-            return f.read()
-    except FileNotFoundError:
-        return "Mapa dinâmico não encontrado", 404
 
 # ============================================================================
 # ROTAS API
@@ -292,7 +275,6 @@ def api_metricas():
             logger.error(f"Erro ao consultar banco: {e}")
             conn.close()
     
-    # Fallback: modo simulação caso o banco esteja inacessível
     import random
     return jsonify({
         'status': 'simulacao',
@@ -331,47 +313,53 @@ def api_status_banco():
         'mensagem': 'Banco de dados não acessível. Sistema em fallback.'
     }), 503
 
-@app.route('/api/rotas', methods=['GET'])
-def api_rotas():
-    """Retorna dados das 6 rotas integradas com o banco real"""
-    conn = conectar_banco()
-    rotas_response = []
+@app.route('/api/rotas-tomtom', methods=['GET'])
+def api_rotas_tomtom():
+    """Busca a geometria real das ruas na TomTom e retorna os pontos para desenhar no mapa"""
+    TOMTOM_API_KEY = os.getenv('TOMTOM_API_KEY', 'hXan3baE73yeieqt6nD012BISAW65QoJ')
     
-    if conn:
+    rotas_definicoes = [
+        {'id': 1, 'nome': 'Rota 1: Praça Liberdade → Funcionários', 'origem': '-19.9282,-43.9353', 'destino': '-19.9019,-43.9099', 'cor': '#3498db'},
+        {'id': 2, 'nome': 'Rota 2: Centro → Lourdes (Av. Brasil)', 'origem': '-19.9282,-43.9298', 'destino': '-19.9059,-43.8969', 'cor': '#e74c3c'},
+        {'id': 3, 'nome': 'Rota 3: Savassi → Funcionários', 'origem': '-19.9250,-43.9370', 'destino': '-19.9019,-43.9099', 'cor': '#9b59b6'},
+        {'id': 4, 'nome': 'Rota 4: Santa Efigênia → Santo Agostinho', 'origem': '-19.9169,-43.9519', 'destino': '-19.8999,-43.9119', 'cor': '#1abc9c'},
+        {'id': 5, 'nome': 'Rota 5: Centro → Santo Agostinho', 'origem': '-19.9250,-43.9299', 'destino': '-19.8999,-43.9119', 'cor': '#f1c40f'},
+        {'id': 6, 'nome': 'Rota 6: Savassi → Santo Agostinho', 'origem': '-19.9260,-43.9370', 'destino': '-19.8999,-43.9119', 'cor': '#16a085'}
+    ]
+    
+    rotas_com_coordenadas = []
+    
+    for r in rotas_definicoes:
+        pontos = []
+        velocidade_media = 30.0
+        tempo_viagem = 300
         try:
-            cursor = conn.cursor()
-            cursor.execute("""
-                SELECT id_via, velocidade_atual, velocidade_livre, tempo_viagem_segundos, nivel_congestionamento_score
-                FROM fato_transito_tempo_real
-                ORDER BY fato_id DESC
-                LIMIT 6
-            """)
-            registros = cursor.fetchall()
-            cursor.close()
-            conn.close()
-            
-            for i, reg in enumerate(registros):
-                rotas_response.append({
-                    'id': i + 1,
-                    'velocidade_media': float(reg[1] or 25.0),
-                    'velocidade_livre': float(reg[2] or 30.0),
-                    'tempo_viagem': int(reg[3] or 0),
-                    'score_congestionamento': float(reg[4] or 0)
-                })
+            url = f"https://api.tomtom.com/routing/1/calculateRoute/{r['origem']}:{r['destino']}/json"
+            resp = requests.get(url, params={'key': TOMTOM_API_KEY, 'traffic': 'true', 'travelMode': 'car'}, timeout=8)
+            if resp.status_code == 200:
+                data = resp.json()
+                rota_tomtom = data['routes'][0]
+                for leg in rota_tomtom.get('legs', []):
+                    for p in leg.get('points', []):
+                        pontos.append({'lat': p['latitude'], 'lng': p['longitude']})
+                summary = rota_tomtom.get('summary', {})
+                tempo_viagem = summary.get('travelTimeInSeconds', 300)
+                distancia_km = summary.get('lengthInMeters', 3000) / 1000.0
+                if tempo_viagem > 0:
+                    velocidade_media = round(distancia_km / (tempo_viagem / 3600.0), 2)
         except Exception as e:
-            logger.error(f"Erro ao buscar rotas: {e}")
+            logger.error(f"Erro TomTom rota {r['id']}: {e}")
             
-    if not rotas_response:
-        for i in range(1, 7):
-            rotas_response.append({
-                'id': i,
-                'velocidade_media': 30.0,
-                'velocidade_livre': 35.0,
-                'tempo_viagem': 300,
-                'score_congestionamento': 10.0
-            })
-            
-    return jsonify({'rotas': rotas_response})
+        rotas_com_coordenadas.append({
+            'id': r['id'],
+            'nome': r['nome'],
+            'cor': r['cor'],
+            'coordenadas': pontos,
+            'velocidade_media': velocidade_media,
+            'tempo_viagem_segundos': tempo_viagem
+        })
+        
+    return jsonify({'status': 'sucesso', 'rotas': rotas_com_coordenadas})
 
 # ============================================================================
 # INICIALIZAÇÃO
