@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🚦 CitizenTech - Dashboard Completo</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.3/leaflet.min.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.3/leaflet.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
@@ -156,92 +158,24 @@
             color: #155724;
         }
 
-        .status-warning {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .status-danger {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
         .chart-container {
             position: relative;
-            height: 300px;
+            height: 250px;
             margin-top: 20px;
         }
 
-        .traffic-flow {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .flow-item {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 10px;
-            border-left: 4px solid #667eea;
-        }
-
-        .flow-label {
-            font-size: 0.9rem;
-            color: #666;
-            margin-bottom: 8px;
-        }
-
-        .flow-bar {
-            background: #e9ecef;
-            height: 20px;
+        .map-container {
+            position: relative;
+            height: 400px;
+            width: 100%;
             border-radius: 10px;
             overflow: hidden;
-            position: relative;
+            margin-top: 15px;
         }
 
-        .flow-progress {
-            height: 100%;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding-right: 8px;
-            color: white;
-            font-size: 0.75rem;
-            font-weight: bold;
-        }
-
-        .table-responsive {
-            overflow-x: auto;
-            margin-top: 20px;
-        }
-
-        table {
+        #map-vias {
             width: 100%;
-            border-collapse: collapse;
-        }
-
-        thead {
-            background: #f8f9fa;
-        }
-
-        th {
-            padding: 12px;
-            text-align: left;
-            color: #333;
-            font-weight: 600;
-            border-bottom: 2px solid #e9ecef;
-        }
-
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #e9ecef;
-            color: #666;
-        }
-
-        tr:hover {
-            background: #f8f9fa;
+            height: 100%;
         }
 
         .full-width {
@@ -257,98 +191,10 @@
             gap: 15px;
         }
 
-        .alert-info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border-left: 4px solid #17a2b8;
-        }
-
         .alert-success {
             background: #d4edda;
             color: #155724;
             border-left: 4px solid #28a745;
-        }
-
-        .alert-warning {
-            background: #fff3cd;
-            color: #856404;
-            border-left: 4px solid #ffc107;
-        }
-
-        .alert-danger {
-            background: #f8d7da;
-            color: #721c24;
-            border-left: 4px solid #dc3545;
-        }
-
-        .alert i {
-            font-size: 1.5rem;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: scale(1.02);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-        }
-
-        .btn-secondary {
-            background: #e9ecef;
-            color: #333;
-        }
-
-        .btn-secondary:hover {
-            background: #dee2e6;
-        }
-
-        .congestion-high {
-            color: #dc3545;
-            font-weight: bold;
-        }
-
-        .congestion-medium {
-            color: #ffc107;
-            font-weight: bold;
-        }
-
-        .congestion-low {
-            color: #28a745;
-            font-weight: bold;
-        }
-
-        .pulsing {
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.7;
-            }
         }
 
         .footer {
@@ -359,21 +205,17 @@
             font-size: 0.9rem;
         }
 
+        .pulsing {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
         @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
             .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .header h1 {
-                font-size: 1.8rem;
-            }
-
-            .traffic-flow {
                 grid-template-columns: 1fr;
             }
         }
@@ -385,7 +227,7 @@
         <div class="header">
             <h1>
                 <i class="fas fa-chart-dashboard"></i>
-                CitizenTech Dashboard
+                CitizenTech Dashboard Completo
             </h1>
             <div class="header-info">
                 <div class="info-box">
@@ -404,7 +246,7 @@
             <i class="fas fa-check-circle"></i>
             <div>
                 <strong>Sistema Operacional</strong>
-                <p>Todos os componentes funcionando normalmente. AWS EC2 coletando dados a cada 5 minutos.</p>
+                <p>Monitoramento de tráfego integrado com TomTom e AWS EC2 ativo.</p>
             </div>
         </div>
 
@@ -413,9 +255,7 @@
             <!-- Card 1: Status do Trânsito Atual -->
             <div class="card">
                 <div class="card-header">
-                    <div class="card-icon">
-                        <i class="fas fa-traffic-light"></i>
-                    </div>
+                    <div class="card-icon"><i class="fas fa-traffic-light"></i></div>
                     <div>
                         <div class="card-title">Trânsito Atual</div>
                         <div class="card-subtitle">Belo Horizonte - Tempo Real</div>
@@ -425,7 +265,7 @@
                 <div class="metric">
                     <span class="metric-label">🌐 Velocidade Média</span>
                     <span>
-                        <span class="metric-value">42</span>
+                        <span class="metric-value" data-metric="velocidade_media">42</span>
                         <span class="metric-unit">km/h</span>
                     </span>
                 </div>
@@ -433,16 +273,8 @@
                 <div class="metric">
                     <span class="metric-label">⏱️ Tempo de Percurso</span>
                     <span>
-                        <span class="metric-value">8</span>
+                        <span class="metric-value" data-metric="tempo_medio">8</span>
                         <span class="metric-unit">min</span>
-                    </span>
-                </div>
-
-                <div class="metric">
-                    <span class="metric-label">🚗 Fator de Atraso</span>
-                    <span>
-                        <span class="metric-value">1.15</span>
-                        <span class="metric-unit">x</span>
                     </span>
                 </div>
 
@@ -461,9 +293,7 @@
             <!-- Card 2: Algoritmo de Semáforos -->
             <div class="card">
                 <div class="card-header">
-                    <div class="card-icon">
-                        <i class="fas fa-brain"></i>
-                    </div>
+                    <div class="card-icon"><i class="fas fa-brain"></i></div>
                     <div>
                         <div class="card-title">Algoritmo Inteligente</div>
                         <div class="card-subtitle">Otimização de Semáforos</div>
@@ -471,17 +301,9 @@
                 </div>
 
                 <div class="metric">
-                    <span class="metric-label">🔄 Status</span>
+                    <span class="metric-label">🔄 Status do Sistema</span>
                     <span class="status-badge status-ok">
                         <i class="fas fa-check-circle"></i> Ativo
-                    </span>
-                </div>
-
-                <div class="metric">
-                    <span class="metric-label">⏰ Última Otimização</span>
-                    <span>
-                        <span class="metric-value">3</span>
-                        <span class="metric-unit">min atrás</span>
                     </span>
                 </div>
 
@@ -501,308 +323,22 @@
                     </span>
                 </div>
 
-                <div class="metric">
-                    <span class="metric-label">⚡ Eficiência do Fluxo</span>
-                    <span>
-                        <span class="metric-value">87</span>
-                        <span class="metric-unit">%</span>
-                    </span>
-                </div>
-
                 <div class="chart-container">
                     <canvas id="algorithmChart"></canvas>
                 </div>
             </div>
 
-            <!-- Card 3: Dados da API TomTom -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-icon">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                    </div>
-                    <div>
-                        <div class="card-title">API TomTom</div>
-                        <div class="card-subtitle">Status de Conexão</div>
-                    </div>
-                </div>
-
-                <div class="metric">
-                    <span class="metric-label">🔗 Conexão</span>
-                    <span class="status-badge status-ok">
-                        <i class="fas fa-check"></i> Conectado
-                    </span>
-                </div>
-
-                <div class="metric">
-                    <span class="metric-label">📡 Requisições Hoje</span>
-                    <span>
-                        <span class="metric-value">288</span>
-                        <span class="metric-unit">(5min)</span>
-                    </span>
-                </div>
-
-                <div class="metric">
-                    <span class="metric-label">⚡ Tempo Médio</span>
-                    <span>
-                        <span class="metric-value">245</span>
-                        <span class="metric-unit">ms</span>
-                    </span>
-                </div>
-
-                <div class="metric">
-                    <span class="metric-label">✅ Taxa de Sucesso</span>
-                    <span>
-                        <span class="metric-value">99.9</span>
-                        <span class="metric-unit">%</span>
-                    </span>
-                </div>
-
-                <div class="metric">
-                    <span class="metric-label">🔑 API Key</span>
-                    <span class="status-badge status-ok">
-                        <i class="fas fa-lock"></i> Validada
-                    </span>
-                </div>
-
-                <div class="button-group">
-                    <button class="btn btn-primary">
-                        <i class="fas fa-sync"></i> Testar Conexão
-                    </button>
-                </div>
-            </div>
-
-            <!-- Card 4: Data Warehouse -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-icon">
-                        <i class="fas fa-database"></i>
-                    </div>
-                    <div>
-                        <div class="card-title">Data Warehouse</div>
-                        <div class="card-subtitle">Snowflake - Status</div>
-                    </div>
-                </div>
-
-                <div class="metric">
-                    <span class="metric-label">📊 Conexão</span>
-                    <span class="status-badge status-ok">
-                        <i class="fas fa-check"></i> Sincronizado
-                    </span>
-                </div>
-
-                <div class="metric">
-                    <span class="metric-label">📈 Registros em Fato</span>
-                    <span>
-                        <span class="metric-value">45,892</span>
-                        <span class="metric-unit">registros</span>
-                    </span>
-                </div>
-
-                <div class="metric">
-                    <span class="metric-label">🔄 Ciclos de Semáforo</span>
-                    <span>
-                        <span class="metric-value">1,247</span>
-                        <span class="metric-unit">registrados</span>
-                    </span>
-                </div>
-
-                <div class="metric">
-                    <span class="metric-label">💾 Espaço Utilizado</span>
-                    <span>
-                        <span class="metric-value">2.3</span>
-                        <span class="metric-unit">GB</span>
-                    </span>
-                </div>
-
-                <div class="metric">
-                    <span class="metric-label">🕐 Última Sincronização</span>
-                    <span>
-                        <span class="metric-value">2</span>
-                        <span class="metric-unit">min atrás</span>
-                    </span>
-                </div>
-
-                <div class="button-group">
-                    <button class="btn btn-secondary">
-                        <i class="fas fa-query"></i> Consultar Dados
-                    </button>
-                </div>
-            </div>
-
-            <!-- Card 5: AWS EC2 -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-icon">
-                        <i class="fas fa-server"></i>
-                    </div>
-                    <div>
-                        <div class="card-title">AWS EC2</div>
-                        <div class="card-subtitle">Coleta de Dados em Tempo Real</div>
-                    </div>
-                </div>
-
-                <div class="metric">
-                    <span class="metric-label">🌐 Instância</span>
-                    <span class="status-badge status-ok">
-                        <i class="fas fa-check"></i> Executando
-                    </span>
-                </div>
-
-                <div class="metric">
-                    <span class="metric-label">⏱️ Uptime</span>
-                    <span>
-                        <span class="metric-value">45</span>
-                        <span class="metric-unit">dias</span>
-                    </span>
-                </div>
-
-                <div class="metric">
-                    <span class="metric-label">💻 CPU</span>
-                    <span>
-                        <span class="metric-value">12.5</span>
-                        <span class="metric-unit">%</span>
-                    </span>
-                </div>
-
-                <div class="metric">
-                    <span class="metric-label">🧠 Memória</span>
-                    <span>
-                        <span class="metric-value">1.8</span>
-                        <span class="metric-unit">GB / 4GB</span>
-                    </span>
-                </div>
-
-                <div class="metric">
-                    <span class="metric-label">🔄 Intervalo de Coleta</span>
-                    <span>
-                        <span class="metric-value">5</span>
-                        <span class="metric-unit">minutos</span>
-                    </span>
-                </div>
-
-                <div class="button-group">
-                    <button class="btn btn-secondary">
-                        <i class="fas fa-external-link-alt"></i> Ver Logs
-                    </button>
-                </div>
-            </div>
-
-            <!-- Card 6: Visualização de Fluxo -->
+            <!-- Card 3: 6 Rotas Sobre Ruas Reais (Incorporado no Dashboard) -->
             <div class="card full-width">
                 <div class="card-header">
-                    <div class="card-icon">
-                        <i class="fas fa-project-diagram"></i>
-                    </div>
+                    <div class="card-icon"><i class="fas fa-map-marked-alt"></i></div>
                     <div>
-                        <div class="card-title">Fluxo de Trânsito por Via</div>
-                        <div class="card-subtitle">Distribuição de tráfego nas principais vias</div>
+                        <div class="card-title">Monitoramento Multi-Rotas Sobre Ruas Reais</div>
+                        <div class="card-subtitle">Visualização de tráfego em tempo real nas vias de Belo Horizonte</div>
                     </div>
                 </div>
-
-                <div class="traffic-flow">
-                    <div class="flow-item">
-                        <div class="flow-label">🛣️ Avenida Afonso Pena</div>
-                        <div class="flow-bar">
-                            <div class="flow-progress" style="width: 65%">65%</div>
-                        </div>
-                    </div>
-
-                    <div class="flow-item">
-                        <div class="flow-label">🛣️ Avenida Getúlio Vargas</div>
-                        <div class="flow-bar">
-                            <div class="flow-progress" style="width: 42%">42%</div>
-                        </div>
-                    </div>
-
-                    <div class="flow-item">
-                        <div class="flow-label">🛣️ Rua Espírito Santo</div>
-                        <div class="flow-bar">
-                            <div class="flow-progress" style="width: 78%">78%</div>
-                        </div>
-                    </div>
-
-                    <div class="flow-item">
-                        <div class="flow-label">🛣️ Avenida Brasil</div>
-                        <div class="flow-bar">
-                            <div class="flow-progress" style="width: 35%">35%</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card 7: Histórico de Semáforos -->
-            <div class="card full-width">
-                <div class="card-header">
-                    <div class="card-icon">
-                        <i class="fas fa-history"></i>
-                    </div>
-                    <div>
-                        <div class="card-title">Histórico de Ajustes</div>
-                        <div class="card-subtitle">Últimas otimizações realizadas pelo algoritmo</div>
-                    </div>
-                </div>
-
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Horário</th>
-                                <th>Semáforo</th>
-                                <th>Via</th>
-                                <th>Tempo Anterior</th>
-                                <th>Tempo Novo</th>
-                                <th>Redução de Fila</th>
-                                <th>Fator de Atraso</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>14:32:15</td>
-                                <td>#SF-001</td>
-                                <td>Av. Afonso Pena</td>
-                                <td>35s</td>
-                                <td>52s</td>
-                                <td><span class="congestion-low">↓ 28%</span></td>
-                                <td><span class="congestion-high">1.45</span></td>
-                            </tr>
-                            <tr>
-                                <td>14:27:03</td>
-                                <td>#SF-012</td>
-                                <td>Rua Espírito Santo</td>
-                                <td>40s</td>
-                                <td>48s</td>
-                                <td><span class="congestion-low">↓ 15%</span></td>
-                                <td><span class="congestion-medium">1.32</span></td>
-                            </tr>
-                            <tr>
-                                <td>14:22:47</td>
-                                <td>#SF-008</td>
-                                <td>Av. Brasil</td>
-                                <td>30s</td>
-                                <td>30s</td>
-                                <td><span class="congestion-low">→ 0%</span></td>
-                                <td><span class="congestion-low">1.10</span></td>
-                            </tr>
-                            <tr>
-                                <td>14:17:22</td>
-                                <td>#SF-005</td>
-                                <td>Av. Getúlio Vargas</td>
-                                <td>45s</td>
-                                <td>38s</td>
-                                <td><span class="congestion-low">↑ -8%</span></td>
-                                <td><span class="congestion-low">1.08</span></td>
-                            </tr>
-                            <tr>
-                                <td>14:12:08</td>
-                                <td>#SF-015</td>
-                                <td>Rua Bahia</td>
-                                <td>35s</td>
-                                <td>58s</td>
-                                <td><span class="congestion-low">↓ 42%</span></td>
-                                <td><span class="congestion-high">1.58</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="map-container">
+                    <div id="map-vias"></div>
                 </div>
             </div>
         </div>
@@ -816,6 +352,8 @@
     </div>
 
     <script>
+        let charts = {};
+
         // Gráfico 1: Trânsito
         const trafficCtx = document.getElementById('trafficChart').getContext('2d');
         charts.traffic = new Chart(trafficCtx, {
@@ -829,28 +367,10 @@
                     backgroundColor: 'rgba(102, 126, 234, 0.1)',
                     borderWidth: 2,
                     fill: true,
-                    tension: 0.4,
-                    pointRadius: 5,
-                    pointBackgroundColor: '#667eea'
+                    tension: 0.4
                 }]
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: false,
-                        min: 0,
-                        max: 100
-                    }
-                }
-            }
+            options: { responsive: true, maintainAspectRatio: false }
         });
 
         // Gráfico 2: Algoritmo
@@ -863,109 +383,79 @@
                     label: 'Semáforos Ajustados',
                     data: [8, 12, 10, 14, 16, 5, 3],
                     backgroundColor: '#667eea'
-                }, {
-                    label: 'Redução de Fila (%)',
-                    data: [15, 22, 18, 25, 28, 12, 8],
-                    backgroundColor: '#764ba2'
                 }]
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    }
-                }
-            }
+            options: { responsive: true, maintainAspectRatio: false }
         });
 
-        // ========================================
-        // AUTO-REFRESH E ATUALIZAÇÃO DE GRÁFICOS
-        // ========================================
-        
-        // Função para atualizar gráficos com dados da API
-        function atualizarGraficos(data) {
-            if (charts.traffic && data.velocidade_media) {
-                // Atualizar gráfico de tráfego com base na velocidade
-                charts.traffic.data.datasets[0].data[0] = data.velocidade_media;
-                charts.traffic.update();
+        // Inicialização do Mapa das 6 Rotas Reais dentro do Dashboard
+        const rotas_reais = [
+            {
+                id: 1,
+                nome: "Rota 1: Praça Liberdade → Funcionários",
+                cor: "#3498db",
+                pontos: [
+                    { lat: -19.9282, lng: -43.9353, nome: "Início - Praça Liberdade" },
+                    { lat: -19.9260, lng: -43.9330, nome: "Semáforo 1 - Av. Afonso Pena" },
+                    { lat: -19.9220, lng: -43.9290, nome: "Semáforo 2 - Cruzamento central" },
+                    { lat: -19.9019, lng: -43.9099, nome: "Destino - Funcionários" }
+                ]
+            },
+            {
+                id: 2,
+                nome: "Rota 2: Centro → Lourdes (Av. Brasil)",
+                cor: "#e74c3c",
+                pontos: [
+                    { lat: -19.9282, lng: -43.9298, nome: "Início - Centro (Av. Brasil)" },
+                    { lat: -19.9200, lng: -43.9150, nome: "Semáforo 2 - Região Central" },
+                    { lat: -19.9059, lng: -43.8969, nome: "Destino - Lourdes" }
+                ]
+            },
+            {
+                id: 3,
+                nome: "Rota 3: Savassi → Funcionários",
+                cor: "#9b59b6",
+                pontos: [
+                    { lat: -19.9250, lng: -43.9370, nome: "Início - Savassi" },
+                    { lat: -19.9150, lng: -43.9230, nome: "Semáforo 2 - Centro" },
+                    { lat: -19.9019, lng: -43.9099, nome: "Destino - Funcionários" }
+                ]
             }
+        ];
+
+        function initMap() {
+            const map = L.map('map-vias').setView([-19.9167, -43.9345], 14);
             
-            if (charts.algorithm && data.total_registros) {
-                // Atualizar gráfico do algoritmo com base no total de registros
-                charts.algorithm.data.datasets[0].data[0] = data.total_registros;
-                charts.algorithm.update();
-            }
-            
-            console.log('[Gráficos Dashboard Completo] Atualizados');
+            L.tileLayer('https://tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap DE',
+                maxZoom: 18
+            }).addTo(map);
+
+            rotas_reais.forEach(layout => {
+                const coordinates = layout.pontos.map(p => [p.lat, p.lng]);
+                L.polyline(coordinates, { color: layout.cor, weight: 6, opacity: 0.9 }).addTo(map);
+
+                layout.pontos.forEach(ponto => {
+                    L.circleMarker([ponto.lat, ponto.lng], {
+                        radius: 8,
+                        fillColor: layout.cor,
+                        color: '#333',
+                        weight: 2,
+                        fillOpacity: 1
+                    }).bindPopup(`<b>${ponto.nome}</b><br>Rota: ${layout.nome}`).addTo(map);
+                });
+            });
         }
 
-        // Atualizar timestamp
+        window.addEventListener('load', () => {
+            initMap();
+        });
+
         function updateTimestamp() {
             const now = new Date();
-            const timeStr = now.toLocaleTimeString('pt-BR');
-            document.getElementById('lastUpdate').textContent = `Última atualização: ${timeStr}`;
+            document.getElementById('lastUpdate').textContent = `Última atualização: ${now.toLocaleTimeString('pt-BR')}`;
         }
-
-        // Auto-refresh a cada 30 segundos
-        let refreshInterval = setInterval(function() {
-            fetch('/api/metricas')
-                .then(response => response.json())
-                .then(data => {
-                    console.log('[Dashboard] Dados atualizados:', data);
-                    
-                    // Atualizar gráficos
-                    atualizarGraficos(data);
-                    
-                    // Atualizar elementos com atributo data-metric
-                    document.querySelectorAll('[data-metric]').forEach(element => {
-                        const metric = element.dataset.metric;
-                        if (data[metric] !== undefined) {
-                            element.textContent = data[metric];
-                        }
-                    });
-                    
-                    // Atualizar timestamp
-                    updateTimestamp();
-                    
-                    // Atualizar status visual
-                    const statusEl = document.getElementById('refresh-status');
-                    if (statusEl) {
-                        statusEl.textContent = 'Atualizado em: ' + new Date().toLocaleTimeString('pt-BR');
-                        statusEl.style.color = '#4caf50';
-                    }
-                })
-                .catch(error => {
-                    console.error('[Dashboard] Erro ao buscar dados:', error);
-                    const statusEl = document.getElementById('refresh-status');
-                    if (statusEl) {
-                        statusEl.textContent = 'Erro ao conectar';
-                        statusEl.style.color = '#f44336';
-                    }
-                });
-        }, 30000);
-
-        // Primeira atualização imediata
-        fetch('/api/metricas')
-            .then(response => response.json())
-            .then(data => {
-                console.log('[Dashboard] Carregamento inicial:', data);
-                atualizarGraficos(data);
-                updateTimestamp();
-            });
-
-        // Parar refresh ao sair da página
-        window.addEventListener('beforeunload', function() {
-            clearInterval(refreshInterval);
-        });
+        updateTimestamp();
     </script>
-
-    <div id="refresh-status" style="position: fixed; bottom: 20px; right: 20px; 
-         background: #333; color: #fff; padding: 10px 15px; border-radius: 5px; 
-         font-size: 12px; z-index: 9999; box-shadow: 0 2px 10px rgba(0,0,0,0.3);">
-        Carregando...
-    </div>
 </body>
 </html>

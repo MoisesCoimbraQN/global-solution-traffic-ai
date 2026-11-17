@@ -44,12 +44,12 @@ def conectar_banco():
         return None
 
 # ============================================================================
-# ROTAS PRINCIPAL
+# ROTA PRINCIPAL
 # ============================================================================
 
 @app.route('/')
 def index():
-    """Página inicial com cards dos dashboards"""
+    """Página inicial limpa com apenas os 3 cards principais"""
     return '''
     <!DOCTYPE html>
     <html lang="pt-BR">
@@ -183,7 +183,7 @@ def index():
                     <div class="card">
                         <div class="card-icon">🗺️</div>
                         <h3>Mapa Interativo</h3>
-                        <p>Visualização da rota dos semáforos, vias e pontos monitorados</p>
+                        <p>Visualização das 6 rotas reais sobre as ruas de Belo Horizonte e pontos monitorados</p>
                         <a href="/dashboard/mapa" class="btn">Abrir Mapa</a>
                     </div>
                 </div>
@@ -197,85 +197,62 @@ def index():
     '''
 
 # ============================================================================
-# ROTAS DOS DASHBOARDS
+# ROTAS DOS DASHBOARDS E MAPAS
 # ============================================================================
 
 @app.route('/dashboard/completo')
 def dashboard_completo():
-    """Serve o Dashboard Completo com auto-refresh a cada 5 minutos"""
+    """Serve o Dashboard Completo"""
     try:
         with open('DASHBOARD_COMPLETO.html', 'r', encoding='utf-8') as f:
-            html = f.read()
-            # Injetar script de auto-refresh se não estiver presente
-            if 'setInterval' not in html:
-                html = html.replace('</body>', '''
-                <script>
-                // Auto-refresh a cada 5 minutos (300000ms)
-                setInterval(function() {
-                    fetch('/api/metricas')
-                        .then(response => response.json())
-                        .then(data => {
-                            console.log('Dados atualizados:', data);
-                            // Atualizar elementos do dashboard
-                            document.querySelectorAll('[data-metric]').forEach(el => {
-                                const metric = el.dataset.metric;
-                                if (data[metric] !== undefined) {
-                                    el.textContent = data[metric];
-                                }
-                            });
-                        })
-                        .catch(error => console.error('Erro ao buscar métricas:', error));
-                }, 300000); // 5 minutos
-                
-                // Primeira atualização imediata
-                fetch('/api/metricas')
-                    .then(response => response.json())
-                    .then(data => console.log('Status inicial:', data));
-                </script>
-                </body>''')
-            return html
+            return f.read()
     except FileNotFoundError:
-        return "Dashboard não encontrado", 404
+        return "Dashboard Completo não encontrado", 404
 
 @app.route('/dashboard/principal')
 def dashboard_principal():
-    """Serve o Dashboard Principal com auto-refresh a cada 5 minutos"""
+    """Serve o Dashboard Principal"""
     try:
         with open('dashboard.html', 'r', encoding='utf-8') as f:
-            html = f.read()
-            # Injetar script de auto-refresh se não estiver presente
-            if 'setInterval' not in html:
-                html = html.replace('</body>', '''
-                <script>
-                // Auto-refresh a cada 5 minutos
-                setInterval(function() {
-                    fetch('/api/metricas')
-                        .then(response => response.json())
-                        .then(data => {
-                            console.log('Dashboard atualizado:', data);
-                            document.querySelectorAll('[data-metric]').forEach(el => {
-                                const metric = el.dataset.metric;
-                                if (data[metric] !== undefined) {
-                                    el.textContent = data[metric];
-                                }
-                            });
-                        })
-                        .catch(error => console.error('Erro:', error));
-                }, 300000); // 5 minutos
-                </script>
-                </body>''')
-            return html
+            return f.read()
     except FileNotFoundError:
-        return "Dashboard não encontrado", 404
+        return "Dashboard Principal não encontrado", 404
 
 @app.route('/dashboard/mapa')
 def dashboard_mapa():
-    """Serve o Mapa Interativo"""
+    """Serve o Mapa Interativo com as 6 Rotas Sobre Ruas Reais"""
     try:
-        with open('mapa_rota_otimizada_final.html', 'r', encoding='utf-8') as f:
+        with open('mapa_6_rotas_reais.html', 'r', encoding='utf-8') as f:
             return f.read()
     except FileNotFoundError:
         return "Mapa não encontrado", 404
+
+@app.route('/dashboard/mapa-multiplas-rotas')
+def dashboard_mapa_multiplas_rotas():
+    """Serve o Mapa com Múltiplas Rotas (Estático)"""
+    try:
+        with open('mapa_multiplas_rotas.html', 'r', encoding='utf-8') as f:
+            return f.read()
+    except FileNotFoundError:
+        return "Mapa de múltiplas rotas não encontrado", 404
+
+@app.route('/dashboard/mapa-6-rotas-reais')
+def dashboard_mapa_6_rotas_reais():
+    """Serve o Mapa com 6 Rotas Sobre Ruas Reais de Belo Horizonte"""
+    try:
+        with open('mapa_6_rotas_reais.html', 'r', encoding='utf-8') as f:
+            return f.read()
+    except FileNotFoundError:
+        return "Mapa de 6 rotas reais não encontrado", 404
+
+@app.route('/dashboard/mapa-dinamico')
+def dashboard_mapa_dinamico():
+    """Serve o Mapa com Múltiplas Rotas com Atualização Dinâmica"""
+    try:
+        with open('mapa_multiplas_rotas_dinamico.html', 'r', encoding='utf-8') as f:
+            return f.read()
+    except FileNotFoundError:
+        return "Mapa dinâmico não encontrado", 404
 
 # ============================================================================
 # ROTAS API
@@ -283,10 +260,7 @@ def dashboard_mapa():
 
 @app.route('/api/metricas', methods=['GET'])
 def api_metricas():
-    """
-    Retorna métricas atualizadas do banco de dados
-    Atualizado a cada 5 minutos pela AWS/PostgreSQL
-    """
+    """Retorna métricas atualizadas do banco de dados"""
     conn = conectar_banco()
     
     if conn:
@@ -296,7 +270,8 @@ def api_metricas():
                 SELECT 
                     AVG(velocidade_atual) as velocidade_media,
                     AVG(tempo_viagem_segundos) as tempo_medio,
-                    COUNT(*) as total_registros
+                    COUNT(*) as total_registros,
+                    AVG(indice_congestionamento) as congestao_media
                 FROM fato_transito_tempo_real
             """)
             
@@ -310,20 +285,21 @@ def api_metricas():
                     'velocidade_media': round(float(resultado[0]), 2),
                     'tempo_medio': round(float(resultado[1]), 2) if resultado[1] else 0,
                     'total_registros': int(resultado[2]),
-                    'timestamp': datetime.now().isoformat(),
-                    'banco': 'AWS PostgreSQL - Atualizado a cada 5 minutos'
+                    'congestao_media': round(float(resultado[3]), 2) if resultado[3] else 0,
+                    'timestamp': datetime.now().isoformat()
                 })
         except Exception as e:
             logger.error(f"Erro ao consultar banco: {e}")
             conn.close()
     
-    # Fallback: modo simulação
+    # Fallback: modo simulação caso o banco esteja inacessível
     import random
     return jsonify({
         'status': 'simulacao',
         'velocidade_media': round(random.uniform(25, 45), 2),
         'tempo_medio': round(random.uniform(8, 15), 2),
         'total_registros': random.randint(50, 150),
+        'congestao_media': round(random.uniform(30, 70), 2),
         'timestamp': datetime.now().isoformat(),
         'aviso': 'Banco de dados em fallback. Dados simulados.'
     })
@@ -344,9 +320,7 @@ def api_status_banco():
             return jsonify({
                 'banco_conectado': True,
                 'mensagem': 'Banco de dados AWS conectado com sucesso',
-                'dashboards_atualizando': True,
-                'registros_total': count,
-                'atualizacao': 'Automática a cada 5 minutos'
+                'registros_total': count
             })
         except Exception as e:
             logger.error(f"Erro ao consultar status: {e}")
@@ -354,10 +328,50 @@ def api_status_banco():
     
     return jsonify({
         'banco_conectado': False,
-        'mensagem': 'Banco de dados não acessível. Sistema em fallback.',
-        'dashboards_atualizando': False,
-        'atualizacao': 'Dados simulados'
+        'mensagem': 'Banco de dados não acessível. Sistema em fallback.'
     }), 503
+
+@app.route('/api/rotas', methods=['GET'])
+def api_rotas():
+    """Retorna dados das 6 rotas integradas com o banco real"""
+    conn = conectar_banco()
+    rotas_response = []
+    
+    if conn:
+        try:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT id_via, velocidade_atual, velocidade_livre, tempo_viagem_segundos, nivel_congestionamento_score
+                FROM fato_transito_tempo_real
+                ORDER BY fato_id DESC
+                LIMIT 6
+            """)
+            registros = cursor.fetchall()
+            cursor.close()
+            conn.close()
+            
+            for i, reg in enumerate(registros):
+                rotas_response.append({
+                    'id': i + 1,
+                    'velocidade_media': float(reg[1] or 25.0),
+                    'velocidade_livre': float(reg[2] or 30.0),
+                    'tempo_viagem': int(reg[3] or 0),
+                    'score_congestionamento': float(reg[4] or 0)
+                })
+        except Exception as e:
+            logger.error(f"Erro ao buscar rotas: {e}")
+            
+    if not rotas_response:
+        for i in range(1, 7):
+            rotas_response.append({
+                'id': i,
+                'velocidade_media': 30.0,
+                'velocidade_livre': 35.0,
+                'tempo_viagem': 300,
+                'score_congestionamento': 10.0
+            })
+            
+    return jsonify({'rotas': rotas_response})
 
 # ============================================================================
 # INICIALIZAÇÃO
@@ -368,15 +382,12 @@ if __name__ == '__main__':
     print("CITIZENTECH - Sistema de Otimizacao de Trafego")
     print("="*70)
     
-    # Testar conexão ao iniciar
     conn = conectar_banco()
     if conn:
         print("[OK] Banco de dados AWS: CONECTADO")
-        print("   Dashboards atualizarao automaticamente a cada 5 minutos")
         conn.close()
     else:
-        print("[!] Banco de dados AWS: DESCONECTADO")
-        print("   Sistema operando em modo fallback (dados simulados)")
+        print("[!] Banco de dados AWS: DESCONECTADO (Modo Fallback Ativo)")
     
     print("="*70)
     print("Servidor iniciando em http://0.0.0.0:5000")

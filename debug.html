@@ -1,0 +1,39 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Mapa</title>
+</head>
+<body>
+    <h1>Debug - Verifica coordenadas das rotas</h1>
+    <pre id="debug"></pre>
+    
+    <script>
+        const BASE_URL = window.location.origin;
+        
+        async function testar() {
+            const response = await fetch(`${BASE_URL}/api/rotas-tomtom`);
+            const data = await response.json();
+            
+            let log = `✅ API Response: ${data.rotas.length} rotas\n\n`;
+            
+            data.rotas.forEach(rota => {
+                const coords = rota.coordenadas;
+                log += `Rota ${rota.id}: ${rota.nome}\n`;
+                log += `  Pontos: ${coords.length}\n`;
+                if (coords.length > 0) {
+                    log += `  Primeira: [${coords[0].lat}, ${coords[0].lng}]\n`;
+                    log += `  Última: [${coords[coords.length-1].lat}, ${coords[coords.length-1].lng}]\n`;
+                    log += `  Cores únicas nos primeiro/último: ${coords[0].lat}, ${coords[coords.length-1].lat}\n`;
+                } else {
+                    log += `  ❌ SEM COORDENADAS!\n`;
+                }
+                log += `\n`;
+            });
+            
+            document.getElementById('debug').innerText = log;
+        }
+        
+        testar();
+    </script>
+</body>
+</html>

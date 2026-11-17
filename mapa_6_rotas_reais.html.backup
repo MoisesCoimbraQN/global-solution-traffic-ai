@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoramento de Múltiplas Rotas - Sobre Ruas Reais</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.3/leaflet.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.3/leaflet.min.css"/>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"/>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+        
+        #map {
+            position: absolute;
+            top: 60px;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 60px);
+        }
+        
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .header h1 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .header-info {
+            display: flex;
+            gap: 20px;
+            font-size: 12px;
+            align-items: center;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+            background: #4caf50;
+            color: white;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .update-counter {
+            font-size: 11px;
+            color: #fff;
+            padding: 2px 8px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 8px;
+        }
+        
+        .legend-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: white;
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 999;
+            max-width: 400px;
+            max-height: 500px;
+            overflow-y: auto;
+            font-size: 12px;
+        }
+        
+        .legend-container h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .route-line {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 11px;
+            padding: 6px;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+        
+        .route-line-color {
+            width: 25px;
+            height: 4px;
+            margin-right: 10px;
+            flex-shrink: 0;
+            border-radius: 2px;
+        }
+        
+        .popup-content {
+            font-family: Arial, sans-serif;
+            width: 280px;
+        }
+        
+        .popup-content h4 {
+            margin: 0 0 6px 0;
+            color: #333;
+            font-size: 13px;
+        }
+        
+        .popup-content p {
+            margin: 3px 0;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+        
+        @media (max-width: 768px) {
+            .header-info {
+                display: none;
+            }
+            
+            .legend-container {
+                width: calc(100% - 40px);
+                bottom: 20px;
+                right: 20px;
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚌 Sistema Multi-Rotas - Monitoramento Sobre Ruas Reais</h1>
+        <div class="header-info">
+            <div class="item">
+                <span class="status-badge">🟢 ONLINE</span>
+            </div>
+            <div class="item">
+                <i class="fas fa-database"></i> API em Tempo Real
+            </div>
+            <div class="item">
+                <span class="update-counter">↻ <span id="update-count">0</span>s</span>
+            </div>
+        </div>
+    </div>
+    
+    <div id="map"></div>
+    
+    <div class="legend-container">
+        <h3>📍 6 Rotas Sobre Ruas Reais de BH</h3>
+        
+        <div class="route-line">
+            <div class="route-line-color" style="background: #3498db;"></div>
+            <span><b>Rota 1:</b> Praça Liberdade → Funcionários</span>
+        </div>
+        
+        <div class="route-line">
+            <div class="route-line-color" style="background: #e74c3c;"></div>
+            <span><b>Rota 2:</b> Centro → Lourdes (Av. Brasil)</span>
+        </div>
+        
+        <div class="route-line">
+            <div class="route-line-color" style="background: #9b59b6;"></div>
+            <span><b>Rota 3:</b> Savassi → Funcionários</span>
+        </div>
+        
+        <div class="route-line">
+            <div class="route-line-color" style="background: #1abc9c;"></div>
+            <span><b>Rota 4:</b> Santa Efigênia → Santo Agostinho</span>
+        </div>
+        
+        <div class="route-line">
+            <div class="route-line-color" style="background: #f1c40f;"></div>
+            <span><b>Rota 5:</b> Centro → Santo Agostinho</span>
+        </div>
+        
+        <div class="route-line">
+            <div class="route-line-color" style="background: #16a085;"></div>
+            <span><b>Rota 6:</b> Savassi → Santo Agostinho</span>
+        </div>
+        
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd; font-size: 11px;">
+            <p><b>✓ Todas as rotas sobre ruas e avenidas reais</b></p>
+            <p><b>✓ 18 Semáforos em cruzamentos reais</b></p>
+            <p><b>✓ Atualização a cada 5 segundos</b></p>
+        </div>
+    </div>
+    
+    <script>
+        const BASE_URL = window.location.origin;
+        const UPDATE_INTERVAL = 5000;
+        
+        let map;
+        let rotas_markers = {};
+        let rotas_polylines = {};
+        let update_counter = 0;
+        
+        // ROTAS SOBRE RUAS REAIS DE BELO HORIZONTE
+        const rotas_reais = [
+            {
+                id: 1,
+                nome: "Rota 1: Praça Liberdade → Funcionários",
+                cor: "#3498db",
+                pontos: [
+                    { lat: -19.92819, lng: -43.93531, nome: "Início - Praça Liberdade", tipo: "inicio" },
+                    { lat: -19.92649, lng: -43.93197, nome: "Semáforo 1 - Av. Afonso Pena", tipo: "semaforo" },
+                    { lat: -19.92199, lng: -43.92819, nome: "Semáforo 2 - Av. Getúlio Vargas", tipo: "semaforo" },
+                    { lat: -19.91199, lng: -43.91897, nome: "Semáforo 3 - Av. Brasil", tipo: "semaforo" },
+                    { lat: -19.90199, lng: -43.90997, nome: "Destino - Funcionários", tipo: "destino" }
+                ]
+            },
+            {
+                id: 2,
+                nome: "Rota 2: Centro → Lourdes (Av. Brasil)",
+                cor: "#e74c3c",
+                pontos: [
+                    { lat: -19.92819, lng: -43.93197, nome: "Início - Centro (Av. Brasil)", tipo: "inicio" },
+                    { lat: -19.92599, lng: -43.92897, nome: "Semáforo 1 - Cruzamento Brasil", tipo: "semaforo" },
+                    { lat: -19.92199, lng: -43.92197, nome: "Semáforo 2 - Av. Brasil Centro", tipo: "semaforo" },
+                    { lat: -19.91199, lng: -43.90897, nome: "Semáforo 3 - Lourdes", tipo: "semaforo" },
+                    { lat: -19.90599, lng: -43.89697, nome: "Destino - Lourdes", tipo: "destino" }
+                ]
+            },
+            {
+                id: 3,
+                nome: "Rota 3: Savassi → Funcionários",
+                cor: "#9b59b6",
+                pontos: [
+                    { lat: -19.92499, lng: -43.93697, nome: "Início - Savassi", tipo: "inicio" },
+                    { lat: -19.92199, lng: -43.93197, nome: "Semáforo 1 - Rua Pernambuco", tipo: "semaforo" },
+                    { lat: -19.91699, lng: -43.92197, nome: "Semáforo 2 - Região Central", tipo: "semaforo" },
+                    { lat: -19.90899, lng: -43.91197, nome: "Semáforo 3 - Av. Olegário Maciel", tipo: "semaforo" },
+                    { lat: -19.90199, lng: -43.90997, nome: "Destino - Funcionários", tipo: "destino" }
+                ]
+            },
+            {
+                id: 4,
+                nome: "Rota 4: Santa Efigênia → Santo Agostinho",
+                cor: "#1abc9c",
+                pontos: [
+                    { lat: -19.91699, lng: -43.95197, nome: "Início - Santa Efigênia", tipo: "inicio" },
+                    { lat: -19.91399, lng: -43.94297, nome: "Semáforo 1 - Av. Amazonas", tipo: "semaforo" },
+                    { lat: -19.91099, lng: -43.93197, nome: "Semáforo 2 - Centro", tipo: "semaforo" },
+                    { lat: -19.90599, lng: -43.92197, nome: "Semáforo 3 - Av. Bias Fortes", tipo: "semaforo" },
+                    { lat: -19.89999, lng: -43.91197, nome: "Destino - Santo Agostinho", tipo: "destino" }
+                ]
+            },
+            {
+                id: 5,
+                nome: "Rota 5: Centro → Santo Agostinho",
+                cor: "#f1c40f",
+                pontos: [
+                    { lat: -19.92499, lng: -43.92997, nome: "Início - Centro", tipo: "inicio" },
+                    { lat: -19.91999, lng: -43.92497, nome: "Semáforo 1 - Rua Bahia", tipo: "semaforo" },
+                    { lat: -19.91499, lng: -43.91997, nome: "Semáforo 2 - Região Lourdes", tipo: "semaforo" },
+                    { lat: -19.90899, lng: -43.91597, nome: "Semáforo 3 - Av. Bias Fortes", tipo: "semaforo" },
+                    { lat: -19.89999, lng: -43.91197, nome: "Destino - Santo Agostinho", tipo: "destino" }
+                ]
+            },
+            {
+                id: 6,
+                nome: "Rota 6: Savassi → Santo Agostinho",
+                cor: "#16a085",
+                pontos: [
+                    { lat: -19.92599, lng: -43.93697, nome: "Início - Savassi", tipo: "inicio" },
+                    { lat: -19.92099, lng: -43.93197, nome: "Semáforo 1 - Rua Inconfidentes", tipo: "semaforo" },
+                    { lat: -19.91399, lng: -43.92197, nome: "Semáforo 2 - Região Central", tipo: "semaforo" },
+                    { lat: -19.90599, lng: -43.91597, nome: "Semáforo 3 - Av. Olegário", tipo: "semaforo" },
+                    { lat: -19.89999, lng: -43.91197, nome: "Destino - Santo Agostinho", tipo: "destino" }
+                ]
+            }
+        ];
+        
+        function desenharRotasIniciais() {
+            // Desenha as rotas com dados padrão quando a página carrega
+            console.log('Desenhando rotas iniciais...');
+            rotas_reais.forEach((layout) => {
+                const coordinates = layout.pontos.map(p => [p.lat, p.lng]);
+                
+                // CRIAR E ADICIONAR A POLYLINE
+                rotas_polylines[layout.id] = L.polyline(coordinates, {
+                    color: layout.cor,
+                    weight: 5,
+                    opacity: 0.85,
+                    dashArray: '0'
+                }).addTo(map);
+                
+                console.log(`✓ Rota ${layout.id} desenhada: ${layout.nome}`);
+                
+                // Desenhar os círculos dos pontos
+                if (!rotas_markers[layout.id]) {
+                    rotas_markers[layout.id] = [];
+                }
+                
+                layout.pontos.forEach((ponto, index) => {
+                    const tamanho = getTamanhoPorTipo(index);
+                    const marker = L.circleMarker([ponto.lat, ponto.lng], {
+                        radius: tamanho,
+                        fillColor: layout.cor,
+                        color: '#333',
+                        weight: 2,
+                        opacity: 1,
+                        fillOpacity: 0.9
+                    }).addTo(map);
+                    
+                    const tipo_nome = ['Ponto Inicial', 'Semáforo', 'Passagem', 'Semáforo', 'Ponto Final'][index];
+                    const popup = `
+                        <div class="popup-content">
+                            <h4>${ponto.nome}</h4>
+                            <p><b>Rota:</b> ${layout.nome}</p>
+                            <p><b>Tipo:</b> ${tipo_nome}</p>
+                            <p><b>Status:</b> ✓ Ativo</p>
+                        </div>
+                    `;
+                    
+                    marker.bindPopup(popup);
+                    marker.bindTooltip(ponto.nome, { permanent: false });
+                    rotas_markers[layout.id][index] = marker;
+                });
+            });
+        }
+        
+            if (velocidade > 30) return '#2ecc71';
+            if (velocidade > 15) return '#f39c12';
+            return '#e74c3c';
+        }
+        
+        function getTamanhoPorTipo(index) {
+            if (index === 0) return 15;
+            if (index === 4) return 15;
+            return 12;
+        }
+        
+        function criarMapa() {
+            map = L.map('map').setView([-19.9167, -43.9345], 14);
+            
+            L.tileLayer('https://tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap DE',
+                maxZoom: 18
+            }).addTo(map);
+            
+            L.tileLayer('https://api.tomtom.com/traffic/map/4/tile/Relative/{z}/{x}/{y}.png?key=hXan3baE73yeieqt6nD012BISAW65QoJ', {
+                attribution: 'TomTom Traffic',
+                opacity: 0.7,
+                maxZoom: 18
+            }).addTo(map);
+        }
+        
+        function atualizarMapa() {
+            fetch(`${BASE_URL}/api/rotas`)
+                .then(response => response.json())
+                .then(data => {
+                    update_counter++;
+                    document.getElementById('update-count').textContent = update_counter;
+                    
+                    rotas_reais.forEach((layout, index) => {
+                        const rota = data.rotas[index];
+                        if (rota) {
+                            atualizarRota(layout, rota);
+                        }
+                    });
+                })
+                .catch(error => console.error('Erro ao buscar rotas:', error));
+        }
+        
+        function atualizarRota(layout, dados) {
+            const cor_velocidade = getCorPorVelocidade(dados.velocidade_media);
+            
+            if (!rotas_markers[layout.id]) {
+                rotas_markers[layout.id] = [];
+            }
+            
+            // DESENHAR A POLYLINE (LINHA DA ROTA) PRIMEIRO
+            if (!rotas_polylines[layout.id]) {
+                const coordinates = layout.pontos.map(p => [p.lat, p.lng]);
+                rotas_polylines[layout.id] = L.polyline(coordinates, {
+                    color: layout.cor,
+                    weight: 5,
+                    opacity: 0.85,
+                    dashArray: '0'
+                }).addTo(map);
+                console.log(`✓ Polyline da Rota ${layout.id} criada com sucesso`);
+            }
+            
+            // DESENHAR OS MARCADORES
+            layout.pontos.forEach((ponto, index) => {
+                const tamanho = getTamanhoPorTipo(index);
+                
+                if (rotas_markers[layout.id][index]) {
+                    rotas_markers[layout.id][index].setStyle({
+                        fillColor: layout.cor,
+                        color: cor_velocidade
+                    });
+                } else {
+                    const marker = L.circleMarker([ponto.lat, ponto.lng], {
+                        radius: tamanho,
+                        fillColor: layout.cor,
+                        color: cor_velocidade,
+                        weight: 2,
+                        opacity: 1,
+                        fillOpacity: 0.9
+                    }).addTo(map);
+                    
+                    const tipo_nome = ['Ponto Inicial', 'Semáforo', 'Passagem', 'Semáforo', 'Ponto Final'][index];
+                    const popup = `
+                        <div class="popup-content">
+                            <h4>${ponto.nome}</h4>
+                            <p><b>Rota:</b> ${dados.nome}</p>
+                            <p><b>Tipo:</b> ${tipo_nome}</p>
+                            <p><b>Status:</b> ✓ Ativo</p>
+                            <p><b>Atraso:</b> ${dados.atraso_segundos}s</p>
+                            <p><b>Velocidade:</b> ${dados.velocidade_media} km/h</p>
+                            <p><b>Congestão:</b> ${dados.congestao}%</p>
+                        </div>
+                    `;
+                    
+                    marker.bindPopup(popup);
+                    marker.bindTooltip(ponto.nome, { permanent: false });
+                    
+                    rotas_markers[layout.id][index] = marker;
+                }
+            });
+        }
+        
+        window.addEventListener('load', () => {
+            criarMapa();
+            desenharRotasIniciais();  // ← Desenha as rotas imediatamente
+            atualizarMapa();
+            setInterval(atualizarMapa, UPDATE_INTERVAL);
+        });
+    </script>
+</body>
+</html>

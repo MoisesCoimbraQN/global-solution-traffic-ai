@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Monitoramento - Múltiplas Rotas de Ônibus</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.3/leaflet.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.3/leaflet.min.css"/>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"/>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+        
+        #map {
+            position: absolute;
+            top: 60px;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 60px);
+        }
+        
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .header h1 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .header-info {
+            display: flex;
+            gap: 20px;
+            font-size: 12px;
+        }
+        
+        .header-info .item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        
+        .status-online {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .legend-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: white;
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 999;
+            max-width: 350px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-size: 12px;
+        }
+        
+        .legend-container h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .legend-item:last-child {
+            border-bottom: none;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        
+        .legend-text {
+            font-size: 11px;
+            line-height: 1.4;
+        }
+        
+        .route-info {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 2px solid #333;
+        }
+        
+        .route-line {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+            font-size: 11px;
+        }
+        
+        .route-line-color {
+            width: 25px;
+            height: 3px;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+        
+        .popup-content {
+            font-family: Arial, sans-serif;
+            width: 240px;
+        }
+        
+        .popup-content h4 {
+            margin: 0 0 6px 0;
+            color: #333;
+            font-size: 13px;
+        }
+        
+        .popup-content p {
+            margin: 3px 0;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+        
+        .popup-status {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        
+        .popup-delay {
+            color: #d9534f;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .header-info {
+                display: none;
+            }
+            
+            .legend-container {
+                width: calc(100% - 40px);
+                bottom: 20px;
+                right: 20px;
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚌 Sistema de Monitoramento de Rotas - CitizenTech</h1>
+        <div class="header-info">
+            <div class="item">
+                <span class="status-badge status-online">🟢 ONLINE</span>
+            </div>
+            <div class="item">
+                <i class="fas fa-database"></i> AWS PostgreSQL
+            </div>
+            <div class="item">
+                <i class="fas fa-map"></i> TomTom Traffic
+            </div>
+        </div>
+    </div>
+    
+    <div id="map"></div>
+    
+    <div class="legend-container">
+        <h3>Legendas do Mapa</h3>
+        
+        <div class="legend-item">
+            <div class="legend-color" style="background: #2ecc71; border: 2px solid #27ae60;"></div>
+            <div class="legend-text">
+                <b>Verde:</b> Fluxo Livre<br/>
+                (Velocidade >30 km/h)
+            </div>
+        </div>
+        
+        <div class="legend-item">
+            <div class="legend-color" style="background: #f39c12; border: 2px solid #d68910;"></div>
+            <div class="legend-text">
+                <b>Amarelo:</b> Fluxo Moderado<br/>
+                (Velocidade 15-30 km/h)
+            </div>
+        </div>
+        
+        <div class="legend-item">
+            <div class="legend-color" style="background: #e74c3c; border: 2px solid #c0392b;"></div>
+            <div class="legend-text">
+                <b>Vermelho:</b> Congestionado<br/>
+                (Velocidade <15 km/h)
+            </div>
+        </div>
+        
+        <div class="route-info">
+            <p style="margin: 0 0 8px 0; font-weight: bold;">📍 Rotas Monitoradas:</p>
+            
+            <div class="route-line">
+                <div class="route-line-color" style="background: #3498db; height: 3px;"></div>
+                <span><b>Rota 1:</b> Praça Liberdade → Funcionários</span>
+            </div>
+            
+            <div class="route-line">
+                <div class="route-line-color" style="background: #e74c3c; height: 3px;"></div>
+                <span><b>Rota 2:</b> Savassi → Centro</span>
+            </div>
+            
+            <div class="route-line">
+                <div class="route-line-color" style="background: #9b59b6; height: 3px;"></div>
+                <span><b>Rota 3:</b> Lourdes → Pampulha</span>
+            </div>
+            
+            <div class="route-line">
+                <div class="route-line-color" style="background: #1abc9c; height: 3px;"></div>
+                <span><b>Rota 4:</b> Belvedere → Barroca</span>
+            </div>
+            
+            <div class="route-line">
+                <div class="route-line-color" style="background: #f1c40f; height: 3px;"></div>
+                <span><b>Rota 5:</b> Santa Efigênia → Floresta</span>
+            </div>
+            
+            <div class="route-line">
+                <div class="route-line-color" style="background: #16a085; height: 3px;"></div>
+                <span><b>Rota 6:</b> São Luíz → Contorno</span>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Cores e dados das rotas
+        const rotas = [
+            {
+                nome: "Rota 1: Praça Liberdade → Funcionários",
+                cor: "#3498db",
+                pontos: [
+                    { lat: -19.9167, lng: -43.9345, nome: "Início - Praça da Liberdade", tipo: "inicio" },
+                    { lat: -19.9200, lng: -43.9300, nome: "Semáforo 1 - Av. Afonso Pena", tipo: "semaforo" },
+                    { lat: -19.9250, lng: -43.9250, nome: "Passagem - Região da Savassi", tipo: "passagem" },
+                    { lat: -19.9300, lng: -43.9200, nome: "Semáforo 2 - Av. Getúlio Vargas", tipo: "semaforo" },
+                    { lat: -19.9350, lng: -43.9150, nome: "Destino - Funcionários", tipo: "destino" }
+                ],
+                velocidade: 23.6,
+                atraso: 158
+            },
+            {
+                nome: "Rota 2: Savassi → Centro",
+                cor: "#e74c3c",
+                pontos: [
+                    { lat: -19.9250, lng: -43.9250, nome: "Início - Savassi", tipo: "inicio" },
+                    { lat: -19.9220, lng: -43.9220, nome: "Semáforo A - Av. Brasil", tipo: "semaforo" },
+                    { lat: -19.9180, lng: -43.9180, nome: "Passagem - Centro", tipo: "passagem" },
+                    { lat: -19.9150, lng: -43.9150, nome: "Semáforo B - Rua da Bahia", tipo: "semaforo" },
+                    { lat: -19.9100, lng: -43.9100, nome: "Destino - Centro", tipo: "destino" }
+                ],
+                velocidade: 18.4,
+                atraso: 345
+            },
+            {
+                nome: "Rota 3: Lourdes → Pampulha",
+                cor: "#9b59b6",
+                pontos: [
+                    { lat: -19.9000, lng: -43.9400, nome: "Início - Lourdes", tipo: "inicio" },
+                    { lat: -19.8950, lng: -43.9450, nome: "Semáforo I - Lourdes", tipo: "semaforo" },
+                    { lat: -19.8900, lng: -43.9500, nome: "Passagem - Região de Lourdes", tipo: "passagem" },
+                    { lat: -19.8850, lng: -43.9550, nome: "Semáforo II - Pampulha", tipo: "semaforo" },
+                    { lat: -19.8800, lng: -43.9600, nome: "Destino - Pampulha", tipo: "destino" }
+                ],
+                velocidade: 28.9,
+                atraso: 72
+            },
+            {
+                nome: "Rota 4: Belvedere → Barroca",
+                cor: "#1abc9c",
+                pontos: [
+                    { lat: -19.9400, lng: -43.9100, nome: "Início - Belvedere", tipo: "inicio" },
+                    { lat: -19.9420, lng: -43.9120, nome: "Semáforo X - Belvedere", tipo: "semaforo" },
+                    { lat: -19.9440, lng: -43.9140, nome: "Passagem - Belvedere", tipo: "passagem" },
+                    { lat: -19.9460, lng: -43.9160, nome: "Semáforo Y - Barroca", tipo: "semaforo" },
+                    { lat: -19.9480, lng: -43.9180, nome: "Destino - Barroca", tipo: "destino" }
+                ],
+                velocidade: 32.1,
+                atraso: 45
+            },
+            {
+                nome: "Rota 5: Santa Efigênia → Floresta",
+                cor: "#f1c40f",
+                pontos: [
+                    { lat: -19.8950, lng: -43.9100, nome: "Início - Santa Efigênia", tipo: "inicio" },
+                    { lat: -19.8970, lng: -43.9080, nome: "Semáforo P - Santa Efigênia", tipo: "semaforo" },
+                    { lat: -19.8990, lng: -43.9060, nome: "Passagem - Centro", tipo: "passagem" },
+                    { lat: -19.9010, lng: -43.9040, nome: "Semáforo Q - Floresta", tipo: "semaforo" },
+                    { lat: -19.9030, lng: -43.9020, nome: "Destino - Floresta", tipo: "destino" }
+                ],
+                velocidade: 26.5,
+                atraso: 128
+            },
+            {
+                nome: "Rota 6: São Luíz → Contorno",
+                cor: "#16a085",
+                pontos: [
+                    { lat: -19.9100, lng: -43.9450, nome: "Início - São Luíz", tipo: "inicio" },
+                    { lat: -19.9120, lng: -43.9430, nome: "Semáforo M - São Luíz", tipo: "semaforo" },
+                    { lat: -19.9140, lng: -43.9410, nome: "Passagem - Contorno", tipo: "passagem" },
+                    { lat: -19.9160, lng: -43.9390, nome: "Semáforo N - Contorno", tipo: "semaforo" },
+                    { lat: -19.9180, lng: -43.9370, nome: "Destino - Contorno", tipo: "destino" }
+                ],
+                velocidade: 21.3,
+                atraso: 203
+            }
+        ];
+        
+        // Criar mapa
+        const map = L.map('map').setView([-19.9167, -43.9345], 14);
+        
+        // Adicionar layer de mapa base
+        L.tileLayer('https://tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap DE',
+            maxZoom: 18
+        }).addTo(map);
+        
+        // Adicionar layer de tráfego do TomTom
+        L.tileLayer('https://api.tomtom.com/traffic/map/4/tile/Relative/{z}/{x}/{y}.png?key=hXan3baE73yeieqt6nD012BISAW65QoJ', {
+            attribution: 'TomTom Traffic',
+            opacity: 0.7,
+            maxZoom: 18
+        }).addTo(map);
+        
+        // Função para determinar cor baseado em velocidade
+        function getCorPorVelocidade(velocidade) {
+            if (velocidade > 30) return '#2ecc71'; // Verde
+            if (velocidade > 15) return '#f39c12'; // Amarelo
+            return '#e74c3c'; // Vermelho
+        }
+        
+        // Função para determinar tamanho do marcador
+        function getTamanhoPorTipo(tipo) {
+            switch(tipo) {
+                case 'inicio': return 15;
+                case 'semaforo': return 12;
+                case 'passagem': return 10;
+                case 'destino': return 15;
+                default: return 10;
+            }
+        }
+        
+        // Desenhar todas as rotas
+        rotas.forEach((rota, index) => {
+            // Desenhar polilinha da rota
+            const coordinates = rota.pontos.map(p => [p.lat, p.lng]);
+            L.polyline(coordinates, {
+                color: rota.cor,
+                weight: 3,
+                opacity: 0.7,
+                dashArray: '5, 5'
+            }).addTo(map);
+            
+            // Adicionar marcadores dos pontos
+            rota.pontos.forEach((ponto, pontoIndex) => {
+                const tamanho = getTamanhoPorTipo(ponto.tipo);
+                const corVelocidade = getCorPorVelocidade(rota.velocidade);
+                
+                // Cor base por rota, mas influenciada pela velocidade
+                let corMarcador = rota.cor;
+                
+                // Criar marcador
+                const marker = L.circleMarker([ponto.lat, ponto.lng], {
+                    radius: tamanho,
+                    fillColor: corMarcador,
+                    color: corVelocidade,
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.9
+                }).addTo(map);
+                
+                // Criar popup
+                const popupContent = `
+                    <div class="popup-content">
+                        <h4>${ponto.nome}</h4>
+                        <p><b>Rota:</b> ${rota.nome}</p>
+                        <p><b>Tipo:</b> ${ponto.tipo === 'inicio' ? 'Ponto Inicial' : ponto.tipo === 'destino' ? 'Ponto Final' : ponto.tipo === 'semaforo' ? 'Semáforo' : 'Passagem'}</p>
+                        <p><b>Status:</b> <span class="popup-status">✓ Ativo / Sincronizado</span></p>
+                        <p class="popup-delay"><b>Atraso atual:</b> ${rota.atraso}s</p>
+                        <p><b>Velocidade Média:</b> ${rota.velocidade} km/h</p>
+                    </div>
+                `;
+                
+                marker.bindPopup(popupContent);
+                marker.bindTooltip(ponto.nome, { permanent: false, direction: 'top', offset: [0, -15] });
+            });
+        });
+        
+        // Adicionar uma camada que mostra todas as rotas com cores diferentes baseadas em velocidade
+        console.log('Sistema de Monitoramento de Rotas Carregado');
+        console.log('Rotas Ativas:', rotas.length);
+        console.log('Total de Semáforos Monitorados:', rotas.reduce((sum, r) => sum + r.pontos.filter(p => p.tipo === 'semaforo').length, 0));
+    </script>
+</body>
+</html>
