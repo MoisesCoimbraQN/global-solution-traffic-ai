@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚦 CitizenTech - Dashboard Completo</title>
+    <title>🚦 CitizenFlow - Dashboard Completo</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.3/leaflet.min.css"/>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.3/leaflet.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
@@ -164,20 +162,6 @@
             margin-top: 20px;
         }
 
-        .map-container {
-            position: relative;
-            height: 400px;
-            width: 100%;
-            border-radius: 10px;
-            overflow: hidden;
-            margin-top: 15px;
-        }
-
-        #map-vias {
-            width: 100%;
-            height: 100%;
-        }
-
         .full-width {
             grid-column: 1 / -1;
         }
@@ -227,7 +211,7 @@
         <div class="header">
             <h1>
                 <i class="fas fa-chart-dashboard"></i>
-                CitizenTech Dashboard Completo
+                CitizenFlow Dashboard Completo
             </h1>
             <div class="header-info">
                 <div class="info-box">
@@ -328,25 +312,12 @@
                 </div>
             </div>
 
-            <!-- Card 3: 6 Rotas Sobre Ruas Reais (Incorporado no Dashboard) -->
-            <div class="card full-width">
-                <div class="card-header">
-                    <div class="card-icon"><i class="fas fa-map-marked-alt"></i></div>
-                    <div>
-                        <div class="card-title">Monitoramento Multi-Rotas Sobre Ruas Reais</div>
-                        <div class="card-subtitle">Visualização de tráfego em tempo real nas vias de Belo Horizonte</div>
-                    </div>
-                </div>
-                <div class="map-container">
-                    <div id="map-vias"></div>
-                </div>
-            </div>
         </div>
 
         <!-- Footer -->
         <div class="footer">
             <i class="fas fa-info-circle"></i>
-            Dashboard CitizenTech v1.0 | Dados atualizados em tempo real via API TomTom | 
+            Dashboard CitizenFlow v1.0 | Dados atualizados em tempo real via API TomTom | 
             <span id="lastUpdate">Última atualização: agora</span>
         </div>
     </div>
@@ -386,69 +357,6 @@
                 }]
             },
             options: { responsive: true, maintainAspectRatio: false }
-        });
-
-        // Inicialização do Mapa das 6 Rotas Reais dentro do Dashboard
-        const rotas_reais = [
-            {
-                id: 1,
-                nome: "Rota 1: Praça Liberdade → Funcionários",
-                cor: "#3498db",
-                pontos: [
-                    { lat: -19.9282, lng: -43.9353, nome: "Início - Praça Liberdade" },
-                    { lat: -19.9260, lng: -43.9330, nome: "Semáforo 1 - Av. Afonso Pena" },
-                    { lat: -19.9220, lng: -43.9290, nome: "Semáforo 2 - Cruzamento central" },
-                    { lat: -19.9019, lng: -43.9099, nome: "Destino - Funcionários" }
-                ]
-            },
-            {
-                id: 2,
-                nome: "Rota 2: Centro → Lourdes (Av. Brasil)",
-                cor: "#e74c3c",
-                pontos: [
-                    { lat: -19.9282, lng: -43.9298, nome: "Início - Centro (Av. Brasil)" },
-                    { lat: -19.9200, lng: -43.9150, nome: "Semáforo 2 - Região Central" },
-                    { lat: -19.9059, lng: -43.8969, nome: "Destino - Lourdes" }
-                ]
-            },
-            {
-                id: 3,
-                nome: "Rota 3: Savassi → Funcionários",
-                cor: "#9b59b6",
-                pontos: [
-                    { lat: -19.9250, lng: -43.9370, nome: "Início - Savassi" },
-                    { lat: -19.9150, lng: -43.9230, nome: "Semáforo 2 - Centro" },
-                    { lat: -19.9019, lng: -43.9099, nome: "Destino - Funcionários" }
-                ]
-            }
-        ];
-
-        function initMap() {
-            const map = L.map('map-vias').setView([-19.9167, -43.9345], 14);
-            
-            L.tileLayer('https://tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap DE',
-                maxZoom: 18
-            }).addTo(map);
-
-            rotas_reais.forEach(layout => {
-                const coordinates = layout.pontos.map(p => [p.lat, p.lng]);
-                L.polyline(coordinates, { color: layout.cor, weight: 6, opacity: 0.9 }).addTo(map);
-
-                layout.pontos.forEach(ponto => {
-                    L.circleMarker([ponto.lat, ponto.lng], {
-                        radius: 8,
-                        fillColor: layout.cor,
-                        color: '#333',
-                        weight: 2,
-                        fillOpacity: 1
-                    }).bindPopup(`<b>${ponto.nome}</b><br>Rota: ${layout.nome}`).addTo(map);
-                });
-            });
-        }
-
-        window.addEventListener('load', () => {
-            initMap();
         });
 
         function updateTimestamp() {

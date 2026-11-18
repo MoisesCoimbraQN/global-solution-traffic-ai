@@ -57,7 +57,7 @@ def index():
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>CitizenTech - Global Solution</title>
+        <title>CitizenFlow - Global Solution</title>
         <style>
             * {
                 margin: 0;
@@ -161,7 +161,7 @@ def index():
     <body>
         <div class="container">
             <div class="header">
-                <h1>🚦 CitizenTech</h1>
+                <h1>🚦 CitizenFlow</h1>
                 <p>Global Solution - Sistema Inteligente de Monitoramento de Tráfego</p>
             </div>
             <div class="content">
@@ -190,7 +190,7 @@ def index():
                 </div>
             </div>
             <div class="footer">
-                <p>© 2026 CitizenTech - Desenvolvido para a Global Solution</p>
+                <p>© 2026 CitizenFlow - Desenvolvido para a Global Solution</p>
             </div>
         </div>
     </body>
@@ -315,7 +315,7 @@ def api_status_banco():
 
 @app.route('/api/rotas-tomtom', methods=['GET'])
 def api_rotas_tomtom():
-    """Busca a geometria real das ruas na TomTom e retorna os pontos para desenhar no mapa"""
+    """Busca a geometria real das ruas na TomTom e retorna os pontos e atrasos para o mapa"""
     TOMTOM_API_KEY = os.getenv('TOMTOM_API_KEY', 'hXan3baE73yeieqt6nD012BISAW65QoJ')
     
     rotas_definicoes = [
@@ -333,6 +333,7 @@ def api_rotas_tomtom():
         pontos = []
         velocidade_media = 30.0
         tempo_viagem = 300
+        atraso_segundos = 0
         try:
             url = f"https://api.tomtom.com/routing/1/calculateRoute/{r['origem']}:{r['destino']}/json"
             resp = requests.get(url, params={'key': TOMTOM_API_KEY, 'traffic': 'true', 'travelMode': 'car'}, timeout=8)
@@ -344,6 +345,8 @@ def api_rotas_tomtom():
                         pontos.append({'lat': p['latitude'], 'lng': p['longitude']})
                 summary = rota_tomtom.get('summary', {})
                 tempo_viagem = summary.get('travelTimeInSeconds', 300)
+                tempo_sem_transito = summary.get('noTrafficTravelTimeInSeconds', tempo_viagem)
+                atraso_segundos = max(0, tempo_viagem - tempo_sem_transito)
                 distancia_km = summary.get('lengthInMeters', 3000) / 1000.0
                 if tempo_viagem > 0:
                     velocidade_media = round(distancia_km / (tempo_viagem / 3600.0), 2)
@@ -356,10 +359,15 @@ def api_rotas_tomtom():
             'cor': r['cor'],
             'coordenadas': pontos,
             'velocidade_media': velocidade_media,
-            'tempo_viagem_segundos': tempo_viagem
+            'tempo_viagem_segundos': tempo_viagem,
+            'atraso_segundos': atraso_segundos
         })
         
-    return jsonify({'status': 'sucesso', 'rotas': rotas_com_coordenadas})
+    return jsonify({
+        'status': 'sucesso',
+        'total_rotas': len(rotas_com_coordenadas),
+        'rotas': rotas_com_coordenadas
+    })
 
 # ============================================================================
 # INICIALIZAÇÃO

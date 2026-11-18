@@ -289,7 +289,7 @@ class DashboardTransito:
         <!-- HEADER -->
         <div class="header">
             <h1>Dashboard de Otimizacao de Transito</h1>
-            <p>Global Solution - CitizenTech | Analise de Impacto do Algoritmo Inteligente</p>
+            <p>Global Solution - CitizenFlow | Analise de Impacto do Algoritmo Inteligente</p>
             <p>Gerado em {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}</p>
         </div>
         
@@ -423,7 +423,7 @@ class DashboardTransito:
         </div>
         
         <div class="footer">
-            <p>Global Solution - CitizenTech | Inteligencia Artificial para Transito</p>
+            <p>Global Solution - CitizenFlow | Inteligencia Artificial para Transito</p>
             <p>Gerado em {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}</p>
         </div>
     </div>
